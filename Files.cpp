@@ -77,10 +77,7 @@ public:
         return s.sum;
 
     } // Return the size of the directory (recursively)
-
-    int stamfunktzia(){
-        return 0;
-    }
+    
     string getAbsolutePath(){
         if (parent!=nullptr)
             return parent->getAbsolutePath() + "/" +getName();

@@ -24,6 +24,9 @@ using namespace std;
     File::File(string name, int size):BaseFile(name){
         this->size=size;
     }
+    File::File(File &otherFile):BaseFile(otherFile.getName()){
+        size=(otherFile.getSize());
+    }
     int  File::getSize() {
         return size;
     }
@@ -36,6 +39,22 @@ using namespace std;
     }
 
     //Directory Class
+    Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()){
+        this->setParent(otherDir.getParent());
+        vector<BaseFile *> v = otherDir.getChildren();
+        for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
+            if(it.operator*()->isFile()){
+                File* f= new File((File&)it.operator*());
+                this->addFile(f);
+            }
+            else{
+                Directory* d= new Directory((Directory&)it.operator*());
+                d->setParent(this);
+                this->addFile(d);
+
+            }
+        }
+    }
 
     bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();

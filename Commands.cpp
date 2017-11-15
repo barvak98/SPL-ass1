@@ -240,9 +240,9 @@ using namespace std;
 
 
 
-CpCommand ::CpCommand(string args): BaseCommand(args){}
+    CpCommand ::CpCommand(string args): BaseCommand(args){}
 
-void CpCommand:: execute(FileSystem & fs){
+    void CpCommand:: execute(FileSystem & fs){
     int index = getArgs().find(" ");
     if(index ==string::npos)
         cout<< " No such file or directory";
@@ -324,6 +324,53 @@ void CpCommand:: execute(FileSystem & fs){
         return "CpCommand";
     }
 
+    RenameCommand::RenameCommand(string args):BaseCommand(args){}
+
+    void RenameCommand::execute(FileSystem & fs){
+        int index = getArgs().find(" ");
+        if(index ==string::npos) {
+            cout << " No such file or directory";
+            return;
+        }
+        string oldpath = getArgs().substr(0, index);
+        string newname = getArgs().substr((index+1));
+        Directory* path;
+        int index1= oldpath.find_last_of("/");
+        if (index1==string::npos){
+            path = &fs.getWorkingDirectory();
+            for (BaseFile* c:path->getChildren()){
+                if (c->getName()==oldpath){
+                    c->setName(newname);
+                    return;
+                }
+            }
+           cout<< "No such file or directory";
+        }
+        else{
+            string thePath = oldpath.substr(0,index1);
+            string oldname = oldpath.substr(index1+1);
+            if (thePath.substr(0,1)=="/")
+                path = getLegalPath(&fs.getRootDirectory(),fs,thePath.substr(1));
+            else
+                path = getLegalPath(&fs.getWorkingDirectory(),fs,thePath);
+
+            if (path== nullptr){
+                cout << "No such file or directory";
+                return;
+            }
+            for (BaseFile* c:path->getChildren()) {
+                if (c->getName() == oldname) {
+                    c->setName(newname);
+                    return;
+                }
+            }
+        }
+        cout<< "No such file or directory";
+
+    }
+    string RenameCommand::toString(){
+        return "rename";
+    }
 
 //
 // Created by eilonben@wincs.cs.bgu.ac.il on 11/14/17.

@@ -15,6 +15,7 @@ public:
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
     virtual string toString()=0;
+    virtual ~BaseFile()=0;
 
 };
 
@@ -28,6 +29,7 @@ public:
 	bool isFile() override;
     string toString() override;
     File(File& otherFile);//Copy constructor
+    ~File() override;
 	
 };
 
@@ -42,6 +44,7 @@ public:
     static bool compName(BaseFile* f1 , BaseFile* f2);
     static bool compSize(BaseFile* f1 , BaseFile* f2);
     Directory (Directory& otherDir); //copy constructor
+    ~Directory() override;
 	bool isFile() override ;
 	Directory(string name, Directory *parent); // Constructor
 	Directory *getParent() const; // Return a pointer to the parent of this directory

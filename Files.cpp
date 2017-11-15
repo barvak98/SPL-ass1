@@ -38,6 +38,9 @@ using namespace std;
         return "FILE      "+getName()+"     " + to_string(getSize());
     }
 
+    File::~File()=default{}
+
+
     //Directory Class
     Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()){
         this->setParent(otherDir.getParent());
@@ -56,6 +59,13 @@ using namespace std;
         }
     }
 
+    Directory::~Directory() {
+        for(BaseFile* c: getChildren()){
+            delete c;
+            c= nullptr;
+        }
+
+    }
     bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();
         }

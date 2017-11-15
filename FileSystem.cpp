@@ -1,25 +1,22 @@
 
-#include "Files.h"
+#include "FileSystem.h"
+using namespace std;
 
 
-class FileSystem {
-private:
-    Directory* rootDirectory;
-    Directory* workingDirectory;
-public:
-    FileSystem():rootDirectory(), workingDirectory(){}
-    Directory& getRootDirectory() const{
+
+    FileSystem::FileSystem():rootDirectory(), workingDirectory(){}
+    Directory& FileSystem::getRootDirectory() const{
         return *rootDirectory;
     } // Return reference to the root directory
-    Directory& getWorkingDirectory() const{
+    Directory& FileSystem::getWorkingDirectory() const{
         return *workingDirectory;
     } // Return reference to the working directory
-    void setWorkingDirectory(Directory *newWorkingDirectory){
+    void FileSystem::setWorkingDirectory(Directory *newWorkingDirectory){
         this->workingDirectory=newWorkingDirectory;
     } // Change the working directory of the file system
 
 
-};
+
 
 
 //

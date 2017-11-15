@@ -1,29 +1,26 @@
-#include "Files.h"
-#include "Commands.h"
 
+#include "Environment.h"
+#include <iostream>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-class Environment {
-private:
-    vector<BaseCommand*> commandsHistory;
-    FileSystem fs;
 
-public:
-    Environment():commandsHistory(), fs(){}
-    void start();
-    FileSystem& getFileSystem() {
+    Environment::Environment():commandsHistory(), fs(){}
+    void Environment::start() {
+        cout <<"not implemented";
+    }
+    FileSystem& Environment::getFileSystem() {
         return fs ;
     } // Get a reference to the file system
-    void addToHistory(BaseCommand *command){
+    void Environment::addToHistory(BaseCommand *command){
         commandsHistory.push_back(command);
     } // Add a new command to the history
-    const vector<BaseCommand*>& getHistory() const{
+    const vector<BaseCommand*>& Environment::getHistory() const{
         return commandsHistory;
     } // Return a reference to the history of commands
-};
+
 
 
 

@@ -1,9 +1,10 @@
 #ifndef FILES_H_
 #define FILES_H_
+
 using namespace std;
 #include <string>
 #include <vector>
-
+#include "FileSystem.h"
 class BaseFile {
 private:
 	string name;
@@ -13,7 +14,7 @@ public:
 	string getName() const;
 	void setName(string newName);
 	virtual int getSize() = 0;
-	virtual bool isFile(){};
+	virtual bool isFile() = 0;
 };
 
 class File : public BaseFile {
@@ -23,7 +24,7 @@ private:
 public:
 	File(string name, int size); // Constructor
 	int getSize(); // Return the size of the file
-	bool isFile() override {};
+	bool isFile() override;
 	
 };
 
@@ -31,11 +32,13 @@ class Directory : public BaseFile {
 private:
 	vector<BaseFile*> children;
 	Directory *parent;
-	static bool compName(BaseFile* f1 , BaseFile* f2);
-	static bool compSize(BaseFile* f1 , BaseFile* f2);
+
+
 
 public:
-	bool isFile() override {};
+    static bool compName(BaseFile* f1 , BaseFile* f2);
+    static bool compSize(BaseFile* f1 , BaseFile* f2);
+	bool isFile() override ;
 	Directory(string name, Directory *parent); // Constructor
 	Directory *getParent() const; // Return a pointer to the parent of this directory
 	void setParent(Directory *newParent); // Change the parent of this directory
@@ -47,6 +50,7 @@ public:
 	vector<BaseFile*> getChildren(); // Return children
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
+
 	
 };
 

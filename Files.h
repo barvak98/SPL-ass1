@@ -15,6 +15,7 @@ public:
 	void setName(string newName);
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
+    virtual string toString()=0;
 };
 
 class File : public BaseFile {
@@ -25,6 +26,7 @@ public:
 	File(string name, int size); // Constructor
 	int getSize(); // Return the size of the file
 	bool isFile() override;
+    string toString() override;
 	
 };
 
@@ -50,6 +52,7 @@ public:
 	vector<BaseFile*> getChildren(); // Return children
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
+    string toString() override;
 
 	
 };

@@ -16,7 +16,7 @@ public:
 	string getArgs();
 	virtual void execute(FileSystem & fs) = 0;
 	virtual string toString() = 0;
-    Directory getLegalPath(Directory wd,FileSystem fs, string args);
+    Directory* getLegalPath(Directory* wd,FileSystem fs, string args);
 };
 
 class PwdCommand : public BaseCommand {

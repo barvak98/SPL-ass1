@@ -7,8 +7,9 @@
 #include "Files.h"
 
 using namespace std;
+    //BaseFile Class
 
-BaseFile::BaseFile(string name):name(name){}
+    BaseFile::BaseFile(string name):name(name){}
     string BaseFile::getName() const{
         return name;
     }
@@ -16,7 +17,7 @@ BaseFile::BaseFile(string name):name(name){}
         name = newName;
     }
 
-
+    //File Class
 
 
 
@@ -30,14 +31,18 @@ BaseFile::BaseFile(string name):name(name){}
         return true;
     }
 
+    string File::toString(){
+        return "FILE      "+getName()+"     " + to_string(getSize());
+    }
 
+    //Directory Class
 
-         bool Directory::compName(BaseFile* f1, BaseFile* f2) {
+    bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();
         }
 
 
-         bool Directory::compSize(BaseFile* f1, BaseFile* f2) {
+    bool Directory::compSize(BaseFile* f1, BaseFile* f2) {
             return f1->getSize() < f2->getSize();
         }
 
@@ -63,7 +68,7 @@ BaseFile::BaseFile(string name):name(name){}
     }// Remove the file from children
     void Directory::sortByName(){
         std:: sort(children.begin(), children.end(), Directory::compName);
-    } // Sort children by name alphabetically (not recursively
+    } // Sort children by name alphabetically (not recursively)
     void Directory::sortBySize(){
         sort(children.begin(), children.end(), Directory::compSize);
     } // Sort children by size (not recursively)
@@ -72,16 +77,22 @@ BaseFile::BaseFile(string name):name(name){}
         return children;
     }// Return children
     int Directory::getSize()  {
-
-
-    } // Return the size of the directory (recursively)
+        int size=0;
+        for (std::vector<BaseFile *>::iterator it = children.begin(); it != children.end(); ++it){
+            size+=size + it.operator*()->getSize();
+        }
+        return size;
+    }
 
 
     string Directory::getAbsolutePath(){
         if (parent!=nullptr)
             return parent->getAbsolutePath() + "/" +getName();
         return "/" +getName();
-    }  //Return the path from the root to this
+    }
+    string Directory::toString(){
+    return "DIR      "+getName()+"     " + to_string(getSize());
+}
 
 // asjbfasfab
 // Created by eilonben@wincs.cs.bgu.ac.il on 11/14/17

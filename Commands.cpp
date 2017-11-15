@@ -11,11 +11,40 @@ using namespace std;
         return args;
     }
 
-    Directory BaseCommand::getLegalPath(Directory wd, FileSystem fs, string args) {
+    Directory* BaseCommand::getLegalPath(Directory* wd, FileSystem fs, string args) {
         if (args.length()==0)
             return wd;
-        if (args.substr(0,1)=="/")
-            return (getLegalPath(fs.getRootDirectory(), fs , args.substr(1)));
+        if (args.substr(0,2)=="..")
+        {
+            if (wd==&fs.getRootDirectory())
+                return nullptr;
+            return getLegalPath(wd->getParent(), fs , args.substr(0,2));
+        }
+        int index = args.find("/");
+        if (index!=string::npos) {
+            string name = args.substr((0, index));
+            vector<BaseFile *> v = wd->getChildren();
+            for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
+                if (it.operator*()->getName() == name) {
+                    if (it.operator*()->isFile())
+                        return nullptr;
+                    return getLegalPath((Directory *) it.operator*(), fs, args.substr(index + 1));
+                }
+            }
+            return nullptr;
+        }
+        else {
+            vector<BaseFile *> v = wd->getChildren();
+            for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
+                if (it.operator*()->getName() == args) {
+                    if (it.operator*()->isFile())
+                        return nullptr;
+                    return (Directory*)it.operator*();
+                }
+            }
+            return nullptr;
+        }
+
 
     }
 
@@ -33,11 +62,22 @@ using namespace std;
     CdCommand::CdCommand(string args):BaseCommand(args){}
     void CdCommand::execute(FileSystem & fs) {
         Directory& tempWorkDirectory=fs.getWorkingDirectory();
-        Directory isLegal = getLegalPath(tempWorkDirectory, fs,getArgs());
+
+        if (getArgs().substr(0,1)=="/") {
+            Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
+            if (isLegal == nullptr)
+                cout << "The system cannot find the path specified";
+
+        }else {
+            Directory* isLegal = getLegalPath(&tempWorkDirectory, fs, getArgs());
+            fs.setWorkingDirectory(isLegal);
+            // TODO: delete isLegal here
+        }
+
 
     }
     string CdCommand::toString(){
-        return "cdCommand";
+        return "Command : cd " + getArgs();
     }
 
 

@@ -61,6 +61,7 @@ using namespace std;
         sortByName();
     } // Add the file to children
     void Directory::removeFile(string name){
+        //TODO: removeFile by name
         //children.erase(std::remove(children.begin(),children.end(),name),children.end());
     }// Remove the file with the specified name from children
     void Directory::removeFile(BaseFile* file){

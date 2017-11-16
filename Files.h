@@ -45,7 +45,8 @@ public:
     static bool compSize(BaseFile* f1 , BaseFile* f2);
     Directory (Directory& otherDir); //Copy constructor
 	Directory (Directory&& otherDir); //Move constructor
-    ~Directory() override;
+    ~Directory() override; //Destructor
+	Directory& operator=(const Directory& other);
 	bool isFile() override ;
 	Directory(string name, Directory *parent); // Constructor
 	Directory *getParent() const; // Return a pointer to the parent of this directory

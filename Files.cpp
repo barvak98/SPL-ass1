@@ -61,19 +61,33 @@ using namespace std;
             }
         }
     }// Copy Constructor
-    Directory::Directory(Directory&& otherDir):BaseFile(otherDir.getName()){
-    for (BaseFile* c: otherDir.getChildren()){
-        addFile(c);
+    Directory::Directory(Directory&& otherDir):BaseFile(otherDir.getName()), children(std::move(otherDir.children)),parent(otherDir.parent)
+    {
+        otherDir.setName("");
+        otherDir.parent= nullptr;
     }
-    delete otherDir;
+    Directory& Directory::operator=(const Directory& other){
+        for (BaseFile* c:children){
+            delete c;
+            c=nullptr;
+        }
+        this->children.clear();
+
+        for (BaseFile* c: other.children){
+            this->addFile(c);
+        }
+        setParent(other.parent);
+        return *this;
+
     }
     Directory::~Directory() {
         for(BaseFile* c: getChildren()){
             delete c;
             c= nullptr;
         }
+        this->children.clear();
 
-    } // Destructor
+    } // Destructor`
     bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();
         }

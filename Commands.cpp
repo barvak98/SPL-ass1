@@ -339,16 +339,13 @@ using namespace std;
                     isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path);
                 if (isPath == nullptr)
                     cout << "No such file or directory";
-                vector<BaseFile *> v = isPath->getChildren();
                 bool found = false;
-                for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
-                    if (it.operator*()->getName() == src.substr(index1 + 1)) {
-                        found = true;
-                        if (it.operator*()->isFile())
-                            (File &) fileToCopy = File((File &) it.operator*());
-                        else
-                            (Directory &) fileToCopy = Directory((Directory &) it.operator*());
-                    }
+                for (BaseFile *c: isPath->getChildren()) {
+                if (c->getName() == src.substr(index1 + 1)) {
+                    found = true;
+                    fileToCopy=c;
+                }
+            }
 
                 if (!found) {
                     cout << " No such file or directory";
@@ -360,7 +357,7 @@ using namespace std;
 
         Directory* destination;
        if (des.substr(0, 1) == "/")
-            destination = getLegalPath(&fs.getRootDirectory(), fs, des);
+            destination = getLegalPath(&fs.getRootDirectory(), fs, des.substr(1));
 
         else
             destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
@@ -368,9 +365,6 @@ using namespace std;
             if (destination == nullptr) {
                 cout << "No such file or directory";
                 return;
-            }
-            if(!fileToCopy->isFile()){
-                ((Directory&)fileToCopy).setParent(destination);
             }
             destination->addFile(fileToCopy);
         }
@@ -426,7 +420,7 @@ using namespace std;
         return "rename";
     }
 
-    HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(){}
+    HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(history){}
     void HistoryCommand::execute(FileSystem & fs){
         for(int i=0; i<history.size(); i++){
             cout<< to_string(i) + history[i]->toString() + "\n";
@@ -436,7 +430,7 @@ using namespace std;
         cout << "history";
     }
 
-    ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(){}
+    ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(history){}
     void ExecCommand::execute(FileSystem & fs){
         int cNum = std::stoi(getArgs());
         if (cNum<0 || cNum > history.size() || history.empty()){
@@ -455,6 +449,43 @@ using namespace std;
     }
     string ErrorCommand::toString(){
         cout << "error";
+    }
+
+    MvCommand::MvCommand(string args):BaseCommand(args){}
+    void MvCommand::execute(FileSystem & fs){
+    }
+    string MvCommand::toString(){}
+
+    RmCommand::RmCommand(string args):BaseCommand(args){}
+    void RmCommand::execute(FileSystem & fs){
+        if (getArgs()=="/" | getArgs()== ""){
+            cout<< "Can't remove directory";
+        }
+        Directory* curr;
+        string toDelete;
+        int index = getArgs().find_last_of("/");
+        if (index==string::npos){
+            curr=&fs.getWorkingDirectory();
+            toDelete=getArgs();
+        }
+        else {
+            string path = getArgs().substr(0,index);
+            toDelete=getArgs().substr(index+1);
+
+            if (path.substr(0, 1) == "/")
+                curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+            else
+                curr = getLegalPath(&fs.getRootDirectory(), fs, path);
+
+            if (curr== nullptr){
+                cout <<"No such file or directory";
+                return;
+            }
+            curr->removeFile(toDelete);
+        }
+    }
+    string RmCommand::toString(){
+        return "rm";
     }
 
 //

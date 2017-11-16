@@ -45,11 +45,15 @@ int main(int , char **) {
     MkfileCommand* mkfile = new MkfileCommand("Eilon 150");
     mkfile->execute(*fs);
      */
+    RmCommand* rm = new RmCommand("f3");
+    rm->execute(*fs);
 
+    CdCommand* cd = new CdCommand("/dir1");
+    cd->execute(*fs);
+    CpCommand* cp = new CpCommand("/dir1/dir2/dir3 /dir1");
+    cp->execute(*fs);
     LsCommand* ls = new LsCommand("");
     ls->execute(*fs);
-    CpCommand* cp = new CpCommand("/dir1/dir2/dir3 /dir1");
-   // cp->execute(*fs);
     PwdCommand* pwd = new PwdCommand("");
     pwd->execute(*fs);
 

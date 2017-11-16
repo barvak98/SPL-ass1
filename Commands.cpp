@@ -18,11 +18,14 @@ using namespace std;
         {
             if (wd==&fs.getRootDirectory())
                 return nullptr;
-            return getLegalPath(wd->getParent(), fs , args.substr(0,2));
+            if (args.length()>2)
+                return getLegalPath(wd->getParent(), fs , args.substr(3));
+            else
+                return getLegalPath(wd->getParent(), fs , "");
         }
         int index = args.find("/");
         if (index!=string::npos) {
-            string name = args.substr((0, index));
+            string name = args.substr(0, index);
             vector<BaseFile *> v = wd->getChildren();
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
                 if (it.operator*()->getName() == name) {
@@ -50,6 +53,10 @@ using namespace std;
 
     PwdCommand::PwdCommand(string args):BaseCommand(args){}
     void PwdCommand::execute(FileSystem & fs){
+        if (&fs.getWorkingDirectory()==&fs.getRootDirectory()){
+            cout <<"/";
+            return;
+        }
         cout<<fs.getWorkingDirectory().getAbsolutePath();
 
     } // Every derived class should implement this function according to the document (pdf)
@@ -93,7 +100,7 @@ using namespace std;
         if (getArgs().length()==0){
             vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-                cout << it.operator*()->toString()+"/n";
+                cout << it.operator*()->toString()+"\n";
             }
         }
         else
@@ -101,7 +108,7 @@ using namespace std;
             fs.getWorkingDirectory().sortBySize();
             vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-                cout << it.operator*()->toString()+"/n";
+                cout << it.operator*()->toString()+"\n";
             }
             fs.getWorkingDirectory().sortByName();
         }
@@ -114,7 +121,7 @@ using namespace std;
                     isLegal->sortBySize();
                     vector<BaseFile *> v = isLegal->getChildren();
                     for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-                        cout << it.operator*()->toString()+"/n";
+                        cout << it.operator*()->toString()+"\n";
                     }
                     isLegal->sortByName();
                 }
@@ -126,7 +133,7 @@ using namespace std;
                 else{
                     vector<BaseFile *> v = isLegal->getChildren();
                     for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-                        cout << it.operator*()->toString()+"/n";
+                        cout << it.operator*()->toString()+"\n";
                     }
                 }
             }
@@ -145,24 +152,48 @@ using namespace std;
     }
 
     void MkdirCommand::execute(FileSystem & fs) {
-        Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs());
-
-        if (isLegal != nullptr)
+        if (getArgs() == "/") {
             cout << "The directory already exists";
-        else {
-            Directory *curr = &fs.getWorkingDirectory();
+            return;
+        }
+        int index = getArgs().find("/");
+        if (index == string::npos) {
+            for (BaseFile *c: fs.getWorkingDirectory().getChildren()) {
+                if (c->getName() == getArgs()) {
+                    cout << "The Directory already exists";
+                }
+            }
+            Directory *newdir = new Directory(getArgs(), &fs.getWorkingDirectory());
+            fs.getWorkingDirectory().addFile(newdir);
+            return;
+        }
+
+            Directory *isPath;
+            Directory *curr;
             string path = getArgs();
             if (getArgs().substr(0, 1) == "/") {
+                isPath = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
                 curr = &fs.getRootDirectory();
                 path = path.substr(1);
-
+            } else {
+                isPath = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs());
+                curr = &fs.getWorkingDirectory();
             }
+            if (isPath == nullptr) {
+                cout << "The system cannot find the path specified";
+                return;
+            }
+
             while (path.length() != 0) {
                 int index = path.find("/");
                 if (index == string::npos) {
+                    for (BaseFile *c: curr->getChildren()) {
+                        if (c->getName() == path) {
+                            cout << "The Directory already exists";
+                        }
+                    }
                     Directory *newdir = new Directory(path, curr);
                     curr->addFile(newdir);
-                    newdir->setParent(curr);
                     path = "";
                 } else {
                     string name = path.substr(0, index);
@@ -171,17 +202,18 @@ using namespace std;
                     bool found = false;
                     for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it) {
                         if (it.operator*()->getName() == name) {
-                            if (it.operator*()->isFile())
+                            if (it.operator*()->isFile()) {
                                 cout << "The system cannot find the path specified";
-                            else {
+                                return;
+                            } else {
                                 curr = (Directory *) it.operator*();
+                                found = true;
                             }
 
                         }
                         if (!found) {
                             Directory *newdir = new Directory(name, curr);
                             curr->addFile(newdir);
-                            newdir->setParent(curr);
                             curr = newdir;
                         }
 
@@ -191,7 +223,8 @@ using namespace std;
             }
 
         }
-    }
+
+
 
     string MkdirCommand::toString(){
         return "mkdir ";
@@ -200,40 +233,79 @@ using namespace std;
     MkfileCommand::MkfileCommand(string args):BaseCommand(args){}
 
     void MkfileCommand::execute(FileSystem &fs) {
-        int index = getArgs().find("/");
+        int index = getArgs().find_last_of("/");
         if (index == string::npos) {
-            cout << "The system cannot find the path specified";
+            for(BaseFile* c: fs.getWorkingDirectory().getChildren()) {
+                if (c->getName() == getArgs()) {
+                    cout << "File already exists";
+                    return;
+                }
+                string file = getArgs().substr((index + 1));
+
+                int index1 = file.find(" ");
+                string size="0";
+                string fileName;
+                if (index1 == string::npos) {
+                    fileName = file;
+                }
+                else {
+                    fileName = file.substr(0, file.find(" "));
+                    size = file.substr(file.find(" ") + 1);
+                }
+                File* toAdd = new File(fileName,std::stoi(size));
+                fs.getWorkingDirectory().addFile(toAdd);
+                return;
+
+            }
+
         } else {
             string path = getArgs().substr(0, index);
             string file = getArgs().substr((index + 1));
-            string fileName = file.substr((0, file.find(" ")));
-            string size = file.substr((file.find(" ") + 1));
+
+            int index1 = file.find(" ");
+            string size="0";
+            string fileName;
+            if (index1 == string::npos) {
+                fileName = file;
+            }
+            else {
+                fileName = file.substr(0, file.find(" "));
+                size = file.substr(file.find(" ") + 1);
+            }
+
+            if (fileName == "/") {
+                cout << "Cannot name file as the root directory";
+            }
+            Directory *dir;
             if (getArgs().substr(0, 1) == "/") {
-                Directory *dir = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+                dir = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
             } else {
-                Directory *dir = getLegalPath(&fs.getWorkingDirectory(), fs, path);
-                if (dir == nullptr)
-                    cout << "The system cannot find the path specified";
+                dir = getLegalPath(&fs.getWorkingDirectory(), fs, path);
+            }
+            if (dir == nullptr){
+                cout << "The system cannot find the path specified";
+                return;
+            }
 
-                else {
-                    vector<BaseFile *> v = dir->getChildren();
-                    bool found = false;
-                    for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
-                        if (it.operator*()->getName() == fileName) {
-                            cout << "The file already exist";
-                            found = true;
-                        }
-                        if (!found) {
-                            File *newFile = new File(fileName, std::stoi(size));
-                            dir->addFile(newFile);
-                        }
 
-                }
+            vector<BaseFile *> v = dir->getChildren();
+            bool found = false;
+            for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
+                if (it.operator*()->getName() == fileName) {
+                    cout << "The file already exists";
+                    found = true;
+                        }
+            if (!found) {
+                File *newFile = new File(fileName, std::stoi(size));
+                dir->addFile(newFile);
+            }
+
+
 
             }
 
         }
-    }
+
         string MkfileCommand::toString() {
             return "mkfile " ;
         }
@@ -281,7 +353,7 @@ using namespace std;
                 else
                     isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path);
                 if (isPath == nullptr)
-                    cout << "Directory* isPath = getLegalPath()";
+                    cout << "No such file or directory";
                 vector<BaseFile *> v = isPath->getChildren();
                 bool found = false;
                 for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)

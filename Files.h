@@ -15,7 +15,7 @@ public:
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
     virtual string toString()=0;
-    virtual ~BaseFile()=0;
+    virtual ~BaseFile();
 
 };
 

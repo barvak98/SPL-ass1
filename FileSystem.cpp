@@ -4,7 +4,7 @@ using namespace std;
 
 
 
-    FileSystem::FileSystem():rootDirectory(), workingDirectory(){}
+    FileSystem::FileSystem():rootDirectory (new Directory("", nullptr)), workingDirectory(rootDirectory){}
     Directory& FileSystem::getRootDirectory() const{
         return *rootDirectory;
     } // Return reference to the root directory

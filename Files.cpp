@@ -17,6 +17,8 @@ using namespace std;
         name = newName;
     }
 
+    BaseFile::~BaseFile() {}
+
     //File Class
 
 
@@ -38,7 +40,7 @@ using namespace std;
         return "FILE      "+getName()+"     " + to_string(getSize());
     }
 
-    File::~File()=default{}
+    File::~File()=default;
 
 
     //Directory Class
@@ -83,18 +85,23 @@ using namespace std;
         return parent;
     } // Return a pointer to the parent of this directory
     void Directory::setParent(Directory *newParent){
-        this->parent=parent;
+        this->parent=newParent;
     } // Change the parent of this directory
     void Directory::addFile(BaseFile* file){
         children.push_back(file);
         sortByName();
     } // Add the file to children
     void Directory::removeFile(string name){
-        //TODO: removeFile by name
-        //children.erase(std::remove(children.begin(),children.end(),name),children.end());
+        for (BaseFile* c:children){
+            if (c->getName()==name){
+                removeFile(c);
+            }
+        }
     }// Remove the file with the specified name from children
     void Directory::removeFile(BaseFile* file){
+        delete file;
         children.erase(std::remove(children.begin(),children.end(),file),children.end());
+
     }// Remove the file from children
     void Directory::sortByName(){
         std:: sort(children.begin(), children.end(), Directory::compName);
@@ -108,8 +115,8 @@ using namespace std;
     }// Return children
     int Directory::getSize()  {
         int size=0;
-        for (std::vector<BaseFile *>::iterator it = children.begin(); it != children.end(); ++it){
-            size+=size + it.operator*()->getSize();
+        for(BaseFile* c: getChildren()){
+            size=size + c->getSize();
         }
         return size;
     }
@@ -118,7 +125,7 @@ using namespace std;
     string Directory::getAbsolutePath(){
         if (parent!=nullptr)
             return parent->getAbsolutePath() + "/" +getName();
-        return "/" +getName();
+        return "";
     }
     string Directory::toString(){
     return "DIR      "+getName()+"     " + to_string(getSize());

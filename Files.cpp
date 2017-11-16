@@ -44,6 +44,7 @@ using namespace std;
 
 
     //Directory Class
+    Directory::Directory(string name, Directory *parent) :BaseFile(name), children(), parent(parent){}// Constructor
     Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()){
         this->setParent(otherDir.getParent());
         vector<BaseFile *> v = otherDir.getChildren();
@@ -59,15 +60,20 @@ using namespace std;
 
             }
         }
+    }// Copy Constructor
+    Directory::Directory(Directory&& otherDir):BaseFile(otherDir.getName()){
+    for (BaseFile* c: otherDir.getChildren()){
+        addFile(c);
     }
-
+    delete otherDir;
+    }
     Directory::~Directory() {
         for(BaseFile* c: getChildren()){
             delete c;
             c= nullptr;
         }
 
-    }
+    } // Destructor
     bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();
         }
@@ -80,7 +86,7 @@ using namespace std;
     bool Directory::isFile()  {
         return false;
     }
-    Directory::Directory(string name, Directory *parent) :BaseFile(name), children(), parent(parent){}// Constructor
+
     Directory* Directory::getParent() const{
         return parent;
     } // Return a pointer to the parent of this directory
@@ -88,6 +94,9 @@ using namespace std;
         this->parent=newParent;
     } // Change the parent of this directory
     void Directory::addFile(BaseFile* file){
+        if (!(file->isFile()))
+            ((Directory&)file).setParent(this);
+
         children.push_back(file);
         sortByName();
     } // Add the file to children

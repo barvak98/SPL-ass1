@@ -10,7 +10,6 @@ using namespace std;
     string BaseCommand::getArgs(){
         return args;
     }
-
     Directory* BaseCommand::getLegalPath(Directory* wd, FileSystem fs, string args) {
         if (args.length()==0)
             return wd;
@@ -64,8 +63,6 @@ using namespace std;
         return "pwdCommand";
     }
 
-
-
     CdCommand::CdCommand(string args):BaseCommand(args){}
     void CdCommand::execute(FileSystem & fs) {
         Directory& tempWorkDirectory=fs.getWorkingDirectory();
@@ -93,7 +90,6 @@ using namespace std;
     string CdCommand::toString(){
         return "cd " + getArgs();
     }
-
 
     LsCommand::LsCommand(string args):BaseCommand(args){}
     void LsCommand::execute(FileSystem &fs) {
@@ -141,16 +137,13 @@ using namespace std;
         }
 
     }
-
     string LsCommand::toString() {
         return "ls "+getArgs();
     }
 
-
     MkdirCommand::MkdirCommand(string args):BaseCommand(args){
 
     }
-
     void MkdirCommand::execute(FileSystem & fs) {
         if (getArgs() == "/") {
             cout << "The directory already exists";
@@ -223,15 +216,11 @@ using namespace std;
             }
 
         }
-
-
-
     string MkdirCommand::toString(){
         return "mkdir ";
     }
 
     MkfileCommand::MkfileCommand(string args):BaseCommand(args){}
-
     void MkfileCommand::execute(FileSystem &fs) {
         int index = getArgs().find_last_of("/");
         if (index == string::npos) {
@@ -305,15 +294,11 @@ using namespace std;
             }
 
         }
-
-        string MkfileCommand::toString() {
+    string MkfileCommand::toString() {
             return "mkfile " ;
         }
 
-
-
     CpCommand ::CpCommand(string args): BaseCommand(args){}
-
     void CpCommand:: execute(FileSystem & fs){
     int index = getArgs().find(" ");
     if(index ==string::npos)
@@ -390,14 +375,11 @@ using namespace std;
             destination->addFile(fileToCopy);
         }
     }
-
-
     string CpCommand:: toString(){
         return "CpCommand";
     }
 
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
-
     void RenameCommand::execute(FileSystem & fs){
         int index = getArgs().find(" ");
         if(index ==string::npos) {
@@ -442,6 +424,37 @@ using namespace std;
     }
     string RenameCommand::toString(){
         return "rename";
+    }
+
+    HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(){}
+    void HistoryCommand::execute(FileSystem & fs){
+        for(int i=0; i<history.size(); i++){
+            cout<< to_string(i) + history[i]->toString() + "\n";
+        }
+    }
+    string HistoryCommand::toString(){
+        cout << "history";
+    }
+
+    ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(){}
+    void ExecCommand::execute(FileSystem & fs){
+        int cNum = std::stoi(getArgs());
+        if (cNum<0 || cNum > history.size() || history.empty()){
+            cout<< "Command not found";
+            return;
+        }
+        history[cNum]->execute(fs);
+    }
+    string ExecCommand::toString(){
+        cout << "exec";
+    }
+
+    ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
+    void ErrorCommand::execute(FileSystem & fs){
+        cout << getArgs() + ": Unknown Command";
+    }
+    string ErrorCommand::toString(){
+        cout << "error";
     }
 
 //

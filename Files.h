@@ -43,7 +43,8 @@ private:
 public:
     static bool compName(BaseFile* f1 , BaseFile* f2);
     static bool compSize(BaseFile* f1 , BaseFile* f2);
-    Directory (Directory& otherDir); //copy constructor
+    Directory (Directory& otherDir); //Copy constructor
+	Directory (Directory&& otherDir); //Move constructor
     ~Directory() override;
 	bool isFile() override ;
 	Directory(string name, Directory *parent); // Constructor

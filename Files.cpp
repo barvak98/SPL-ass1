@@ -26,9 +26,6 @@ using namespace std;
     File::File(string name, int size):BaseFile(name){
         this->size=size;
     }
-    File::File(File &otherFile):BaseFile(otherFile.getName()){
-        size=(otherFile.getSize());
-    }
     int  File::getSize() {
         return size;
     }

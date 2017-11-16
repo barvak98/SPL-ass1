@@ -6,9 +6,9 @@
 unsigned int verbose = 0;
 
 int main(int , char **) {
-	//Environment env;
-	//env.start();
-    Directory* dir1 = new Directory("dir1",nullptr);
+	Environment env;
+	env.start();
+   /* Directory* dir1 = new Directory("dir1",nullptr);
     File* f1= new File("f1",24);
     dir1->addFile(f1);
 
@@ -22,6 +22,7 @@ int main(int , char **) {
     Directory* dir3 = new Directory("dir3",dir2);
     dir2->addFile(dir3);
     dir3->addFile(f3);
+
 
 
 
@@ -44,7 +45,7 @@ int main(int , char **) {
     cd->execute(*fs);
     MkfileCommand* mkfile = new MkfileCommand("Eilon 150");
     mkfile->execute(*fs);
-     */
+
     RmCommand* rm = new RmCommand("f3");
     rm->execute(*fs);
 
@@ -56,6 +57,6 @@ int main(int , char **) {
     ls->execute(*fs);
     PwdCommand* pwd = new PwdCommand("");
     pwd->execute(*fs);
-
+*/
 	return 0;
 }

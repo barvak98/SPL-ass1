@@ -56,7 +56,7 @@ using namespace std;
             cout <<"/";
             return;
         }
-        cout<<fs.getWorkingDirectory().getAbsolutePath();
+        cout<<fs.getWorkingDirectory().getAbsolutePath()+ "\n";
 
     } // Every derived class should implement this function according to the document (pdf)
     string PwdCommand::toString() {
@@ -164,12 +164,13 @@ using namespace std;
             Directory *isPath;
             Directory *curr;
             string path = getArgs();
+            int index1 = getArgs().find_last_of("/");
             if (getArgs().substr(0, 1) == "/") {
-                isPath = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
+                isPath = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1,index1));
                 curr = &fs.getRootDirectory();
                 path = path.substr(1);
             } else {
-                isPath = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs());
+                isPath = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs().substr(0,index1));
                 curr = &fs.getWorkingDirectory();
             }
             if (isPath == nullptr) {
@@ -229,6 +230,7 @@ using namespace std;
                     cout << "File already exists";
                     return;
                 }
+            }
                 string file = getArgs().substr((index + 1));
 
                 int index1 = file.find(" ");
@@ -245,7 +247,7 @@ using namespace std;
                 fs.getWorkingDirectory().addFile(toAdd);
                 return;
 
-            }
+
 
         } else {
             string path = getArgs().substr(0, index);
@@ -317,7 +319,7 @@ using namespace std;
                 if (it.operator*()->getName() == src) {
                     found = true;
                     if (it.operator*()->isFile())
-                        (File &) fileToCopy = File((File &) it.operator*());
+                        fileToCopy=(File*)it.operator*();
 
                     else {
                         (Directory &) fileToCopy = Directory((Directory &) it.operator*());
@@ -334,11 +336,13 @@ using namespace std;
                 string path = src.substr(0, index);
                 Directory *isPath;
                 if (path.substr(0, 1) == "/")
-                    isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+                    isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1,index1));
                 else
-                    isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path);
-                if (isPath == nullptr)
+                    isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0,index1));
+                if (isPath == nullptr) {
                     cout << "No such file or directory";
+                    return;
+                }
                 bool found = false;
                 for (BaseFile *c: isPath->getChildren()) {
                 if (c->getName() == src.substr(index1 + 1)) {
@@ -375,6 +379,7 @@ using namespace std;
 
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
     void RenameCommand::execute(FileSystem & fs){
+
         int index = getArgs().find(" ");
         if(index ==string::npos) {
             cout << " No such file or directory";
@@ -383,6 +388,9 @@ using namespace std;
         string oldpath = getArgs().substr(0, index);
         string newname = getArgs().substr((index+1));
         Directory* path;
+        if(oldpath== "/"){
+            cout << "Can't rename directory";
+        }
         int index1= oldpath.find_last_of("/");
         if (index1==string::npos){
             path = &fs.getWorkingDirectory();
@@ -408,6 +416,9 @@ using namespace std;
             }
             for (BaseFile* c:path->getChildren()) {
                 if (c->getName() == oldname) {
+                    if(c=&fs.getWorkingDirectory()){
+                        cout << "Can't rename directory";
+                    }
                     c->setName(newname);
                     return;
                 }
@@ -445,14 +456,113 @@ using namespace std;
 
     ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
     void ErrorCommand::execute(FileSystem & fs){
-        cout << getArgs() + ": Unknown Command";
+        cout << getArgs() + ": Unknown Command"+"\n";
     }
     string ErrorCommand::toString(){
         cout << "error";
     }
 
     MvCommand::MvCommand(string args):BaseCommand(args){}
+
     void MvCommand::execute(FileSystem & fs){
+        string src;
+        int index = getArgs().find(" ");
+        if(index ==string::npos)
+            cout<< " No such file or directory";
+
+        else{
+            string src = getArgs().substr(0, index);
+            string des = getArgs().substr((index+1));
+            int index1=src.find_last_of("/");
+            BaseFile* fileToCopy;
+            if(index1==string::npos) {
+
+                vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
+                bool found = false;
+                for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
+                    if (it.operator*()->getName() == src) {
+                        found = true;
+                        if (it.operator*()->isFile())
+                            fileToCopy=(File*)it.operator*();
+
+                        else {
+                            (Directory &) fileToCopy = Directory((Directory &) it.operator*());
+                        }
+                    }
+                if (!found) {
+                    cout << " No such file or directory";
+                    return;
+                }
+            }
+            if(src=="/")
+                fileToCopy=&fs.getRootDirectory();
+            else {
+                string path = src.substr(0, index);
+                Directory *isPath;
+                if (path.substr(0, 1) == "/")
+                    isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1,index1));
+                else
+                    isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0,index1));
+                if (isPath == nullptr) {
+                    cout << "No such file or directory";
+                    return;
+                }
+                bool found = false;
+                for (BaseFile *c: isPath->getChildren()) {
+                    if (c->getName() == src.substr(index1 + 1)) {
+                        found = true;
+                        fileToCopy=c;
+                    }
+                }
+
+                if (!found) {
+                    cout << " No such file or directory";
+                    return;
+                }
+
+            }
+
+
+            Directory* destination;
+            if (des.substr(0, 1) == "/")
+                destination = getLegalPath(&fs.getRootDirectory(), fs, des.substr(1));
+
+            else
+                destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
+
+            if (destination == nullptr) {
+                cout << "No such file or directory";
+                return;
+            }
+            destination->addFile(fileToCopy);
+        }
+        //remove
+        if (src=="/" | src== "")
+            cout<< "Can't remove directory";
+
+        Directory* curr;
+        string toDelete;
+        index = src.find_last_of("/");
+        if (index==string::npos){
+            curr=&fs.getWorkingDirectory();
+            toDelete=src;
+        }
+        else {
+            string path = src.substr(0,index);
+            toDelete=src.substr(index+1);
+
+            if (path.substr(0, 1) == "/")
+                curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+            else
+                curr = getLegalPath(&fs.getRootDirectory(), fs, path);
+
+            if (curr== nullptr){
+                cout <<"No such file or directory";
+                return;
+            }
+
+        }curr->removeFile(toDelete);
+
     }
     string MvCommand::toString(){}
 
@@ -481,8 +591,8 @@ using namespace std;
                 cout <<"No such file or directory";
                 return;
             }
-            curr->removeFile(toDelete);
-        }
+
+        }curr->removeFile(toDelete);
     }
     string RmCommand::toString(){
         return "rm";

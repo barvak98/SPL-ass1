@@ -28,7 +28,6 @@ public:
 	int getSize(); // Return the size of the file
 	bool isFile() override;
     string toString() override;
-    File(File& otherFile);//Copy constructor
     ~File() override;
 	
 };

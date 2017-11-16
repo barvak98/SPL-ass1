@@ -11,6 +11,12 @@ using namespace std;
     void Environment::start() {
         string input="";
         while(input!="exit"){
+            if(&fs.getWorkingDirectory()==&fs.getRootDirectory()){
+                cout << "/>";
+            }
+            else {
+                cout << fs.getWorkingDirectory().getAbsolutePath() + ">";
+            }
             std::getline (std::cin,input);
             string cmd;
             string arg;
@@ -23,21 +29,24 @@ using namespace std;
                     BaseCommand* pwd = new PwdCommand("");
                     pwd->execute(fs);
                     commandsHistory.push_back(pwd);
+
                 }
-                if( cmd =="ls")
+                else if( cmd =="ls")
                 {
                    BaseCommand* ls = new LsCommand("");
                     ls->execute(fs);
                     commandsHistory.push_back(ls);
                 }
-                if(cmd=="history"){
+                else if(cmd=="history"){
                     BaseCommand* his =  new HistoryCommand("", commandsHistory);
                     his->execute(fs);
                     commandsHistory.push_back(his);
                 }
-               BaseCommand* err= new ErrorCommand(input);
-                err->execute(fs);
-                commandsHistory.push_back(err);
+               else {
+                    BaseCommand *err = new ErrorCommand(input);
+                    err->execute(fs);
+                    commandsHistory.push_back(err);
+                }
 
             }
             else{
@@ -49,63 +58,65 @@ using namespace std;
                     commandsHistory.push_back(cd);
 
                 }
-                if( cmd== "ls" ){
+               else if( cmd== "ls" ){
                     BaseCommand* ls = new LsCommand(arg);
                     ls->execute(fs);
                     commandsHistory.push_back(ls);
 
                 }
-                if( cmd== "mkdir" ){
+                else if( cmd== "mkdir" ){
                     BaseCommand* mkdir = new MkdirCommand(arg);
                     mkdir->execute(fs);
                     commandsHistory.push_back(mkdir);
                 }
-                if( cmd== "mkfile" ){
+                else if( cmd== "mkfile" ){
                     BaseCommand* mkfile= new MkfileCommand(arg);
                     mkfile->execute(fs);
                     commandsHistory.push_back(mkfile);
 
                 }
-                if( cmd== "cp" ){
+                else if( cmd== "cp" ){
                     BaseCommand* cp = new CpCommand(arg);
                     cp->execute(fs);
                     commandsHistory.push_back(cp);
 
                 }
-                if( cmd== "mv" ){
+               else if( cmd== "mv" ){
                     BaseCommand* mv = new MvCommand(arg);
                     mv->execute(fs);
                     commandsHistory.push_back(mv);
 
                 }
-                if( cmd== "rename" ){
+              else  if( cmd== "rename" ){
                     BaseCommand* rename = new LsCommand(arg);
                     rename->execute(fs);
                     commandsHistory.push_back(rename);
 
                 }
-                if( cmd== "rm" ){
+               else if( cmd== "rm" ){
                     BaseCommand* rm = new LsCommand(arg);
                     rm->execute(fs);
                     commandsHistory.push_back(rm);
 
                 }
-                if( cmd== "verbose" ){
+                else if( cmd== "verbose" ){
                     BaseCommand* verbose = new LsCommand(arg);
                     verbose->execute(fs);
                     commandsHistory.push_back(verbose);
 
                 }
-                if( cmd== "exec" ){
+                else if( cmd== "exec" ){
                     BaseCommand* exec = new LsCommand(arg);
                     exec->execute(fs);
                     commandsHistory.push_back(exec);
 
                 }
 
-                BaseCommand* err= new ErrorCommand(cmd);
-                err->execute(fs);
-                commandsHistory.push_back(err);
+               else {
+                    BaseCommand *err = new ErrorCommand(cmd);
+                    err->execute(fs);
+                    commandsHistory.push_back(err);
+                }
 
             }
         }

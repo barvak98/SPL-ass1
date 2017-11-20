@@ -46,6 +46,7 @@ public:
 	Directory (Directory&& otherDir); //Move constructor
     ~Directory() override; //Destructor
 	Directory& operator=(const Directory& other);
+	Directory& operator=(Directory &&other);
 	bool isFile() override ;
 	Directory(string name, Directory *parent); // Constructor
 	Directory *getParent() const; // Return a pointer to the parent of this directory

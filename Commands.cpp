@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include "Commands.h"
+#include "GlobalVariables.h"
 using namespace std;
 
 
@@ -10,6 +11,12 @@ using namespace std;
     string BaseCommand::getArgs(){
         return args;
     }
+
+    void BaseCommand::verb(){
+        if (verbose==2 || verbose==3)
+            cout<< this->toString() + "\n";
+    }
+
     Directory* BaseCommand::getLegalPath(Directory* wd, FileSystem fs, string args) {
         if (args.length()==0)
             return wd;
@@ -49,6 +56,20 @@ using namespace std;
 
 
     }
+    bool BaseCommand::isWdAncestor(FileSystem fs, Directory *d) {
+        bool found=false;
+        for (BaseFile* c: d->getChildren()){
+            if (found)
+                return true;
+            if (c==&fs.getWorkingDirectory())
+                return true;
+            else
+                if (!c->isFile())
+                    found = isWdAncestor(fs,(Directory*)c);
+
+        }
+        return false;
+    }
 
     PwdCommand::PwdCommand(string args):BaseCommand(args){}
     void PwdCommand::execute(FileSystem & fs){
@@ -60,7 +81,7 @@ using namespace std;
 
     } // Every derived class should implement this function according to the document (pdf)
     string PwdCommand::toString() {
-        return "pwdCommand";
+        return "pwdCommand \n";
     }
 
     CdCommand::CdCommand(string args):BaseCommand(args){}
@@ -70,7 +91,7 @@ using namespace std;
         if (getArgs().substr(0,1)=="/") {
             Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
             if (isLegal == nullptr) {
-                cout << "The system cannot find the path specified";
+                cout << "The system cannot find the path specified \n ";
             }
             else
             fs.setWorkingDirectory(isLegal);
@@ -78,7 +99,7 @@ using namespace std;
         }else {
             Directory* isLegal = getLegalPath(&tempWorkDirectory, fs, getArgs());
             if (isLegal == nullptr) {
-                cout << "The system cannot find the path specified";
+                cout << "The system cannot find the path specified \n";
             }
             else
             fs.setWorkingDirectory(isLegal);
@@ -88,7 +109,7 @@ using namespace std;
 
     }
     string CdCommand::toString(){
-        return "cd " + getArgs();
+        return "cd " + getArgs()+"\n";
     }
 
     LsCommand::LsCommand(string args):BaseCommand(args){}
@@ -112,7 +133,7 @@ using namespace std;
             if (getArgs().substr(0,3)=="-s ") {
                 Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(3));
                 if (isLegal == nullptr)
-                    cout << "The system cannot find the path specified";
+                    cout << "The system cannot find the path specified \n";
                 else{
                     isLegal->sortBySize();
                     vector<BaseFile *> v = isLegal->getChildren();
@@ -125,7 +146,7 @@ using namespace std;
             else {
                 Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs());
                 if (isLegal == nullptr)
-                    cout << "The system cannot find the path specified";
+                    cout << "The system cannot find the path specified \n";
                 else{
                     vector<BaseFile *> v = isLegal->getChildren();
                     for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
@@ -138,7 +159,7 @@ using namespace std;
 
     }
     string LsCommand::toString() {
-        return "ls "+getArgs();
+        return "ls "+getArgs()+"\n";
     }
 
     MkdirCommand::MkdirCommand(string args):BaseCommand(args){
@@ -146,14 +167,14 @@ using namespace std;
     }
     void MkdirCommand::execute(FileSystem & fs) {
         if (getArgs() == "/") {
-            cout << "The directory already exists";
+            cout << "The directory already exists \n";
             return;
         }
         int index = getArgs().find("/");
         if (index == string::npos) {
             for (BaseFile *c: fs.getWorkingDirectory().getChildren()) {
                 if (c->getName() == getArgs()) {
-                    cout << "The Directory already exists";
+                    cout << "The Directory already exists \n";
                 }
             }
             Directory *newdir = new Directory(getArgs(), &fs.getWorkingDirectory());
@@ -174,7 +195,7 @@ using namespace std;
                 curr = &fs.getWorkingDirectory();
             }
             if (isPath == nullptr) {
-                cout << "The system cannot find the path specified";
+                cout << "The system cannot find the path specified \n";
                 return;
             }
 
@@ -183,7 +204,7 @@ using namespace std;
                 if (index == string::npos) {
                     for (BaseFile *c: curr->getChildren()) {
                         if (c->getName() == path) {
-                            cout << "The Directory already exists";
+                            cout << "The Directory already exists \n";
                         }
                     }
                     Directory *newdir = new Directory(path, curr);
@@ -197,7 +218,7 @@ using namespace std;
                     for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it) {
                         if (it.operator*()->getName() == name) {
                             if (it.operator*()->isFile()) {
-                                cout << "The system cannot find the path specified";
+                                cout << "The system cannot find the path specified \n";
                                 return;
                             } else {
                                 curr = (Directory *) it.operator*();
@@ -218,7 +239,7 @@ using namespace std;
 
         }
     string MkdirCommand::toString(){
-        return "mkdir ";
+        return "mkdir "+getArgs()+"\n";
     }
 
     MkfileCommand::MkfileCommand(string args):BaseCommand(args){}
@@ -227,7 +248,7 @@ using namespace std;
         if (index == string::npos) {
             for(BaseFile* c: fs.getWorkingDirectory().getChildren()) {
                 if (c->getName() == getArgs()) {
-                    cout << "File already exists";
+                    cout << "File already exists \n";
                     return;
                 }
             }
@@ -265,7 +286,7 @@ using namespace std;
             }
 
             if (fileName == "/") {
-                cout << "Cannot name file as the root directory";
+                cout << "Cannot name file as the root directory \n";
             }
             Directory *dir;
             if (getArgs().substr(0, 1) == "/") {
@@ -274,7 +295,7 @@ using namespace std;
                 dir = getLegalPath(&fs.getWorkingDirectory(), fs, path);
             }
             if (dir == nullptr){
-                cout << "The system cannot find the path specified";
+                cout << "The system cannot find the path specified \n";
                 return;
             }
 
@@ -283,7 +304,7 @@ using namespace std;
             bool found = false;
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
                 if (it.operator*()->getName() == fileName) {
-                    cout << "The file already exists";
+                    cout << "The file already exists \n";
                     found = true;
                         }
             if (!found) {
@@ -297,14 +318,14 @@ using namespace std;
 
         }
     string MkfileCommand::toString() {
-            return "mkfile " ;
+            return "mkfile " + getArgs() +"\n" ;
         }
 
     CpCommand ::CpCommand(string args): BaseCommand(args){}
     void CpCommand:: execute(FileSystem & fs){
     int index = getArgs().find(" ");
     if(index ==string::npos)
-        cout<< " No such file or directory";
+        cout<< " No such file or directory \n";
 
     else{
         string src = getArgs().substr(0, index);
@@ -326,7 +347,7 @@ using namespace std;
                     }
                 }
             if (!found) {
-                cout << " No such file or directory";
+                cout << " No such file or directory \n";
                 return;
             }
         }
@@ -340,7 +361,7 @@ using namespace std;
                 else
                     isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0,index1));
                 if (isPath == nullptr) {
-                    cout << "No such file or directory";
+                    cout << "No such file or directory \n";
                     return;
                 }
                 bool found = false;
@@ -352,7 +373,7 @@ using namespace std;
             }
 
                 if (!found) {
-                    cout << " No such file or directory";
+                    cout << " No such file or directory \n";
                     return;
                 }
 
@@ -367,14 +388,14 @@ using namespace std;
             destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
 
             if (destination == nullptr) {
-                cout << "No such file or directory";
+                cout << "No such file or directory \n";
                 return;
             }
             destination->addFile(fileToCopy);
         }
     }
     string CpCommand:: toString(){
-        return "CpCommand";
+        return "CpCommand "+getArgs()+"\n";
     }
 
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
@@ -428,7 +449,7 @@ using namespace std;
 
     }
     string RenameCommand::toString(){
-        return "rename";
+        return "rename "+getArgs()+"\n";
     }
 
     HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(history){}
@@ -438,20 +459,20 @@ using namespace std;
         }
     }
     string HistoryCommand::toString(){
-        cout << "history";
+        cout << "history "+getArgs()+"\n";
     }
 
     ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(history){}
     void ExecCommand::execute(FileSystem & fs){
         int cNum = std::stoi(getArgs());
         if (cNum<0 || cNum > history.size() || history.empty()){
-            cout<< "Command not found";
+            cout<< "Command not found \n";
             return;
         }
         history[cNum]->execute(fs);
     }
     string ExecCommand::toString(){
-        cout << "exec";
+        cout << "exec "+getArgs()+"\n";
     }
 
     ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
@@ -459,7 +480,7 @@ using namespace std;
         cout << getArgs() + ": Unknown Command"+"\n";
     }
     string ErrorCommand::toString(){
-        cout << "error";
+        cout << "error "+getArgs()+"\n";
     }
 
     MvCommand::MvCommand(string args):BaseCommand(args){}
@@ -468,7 +489,7 @@ using namespace std;
         string src;
         int index = getArgs().find(" ");
         if(index ==string::npos)
-            cout<< " No such file or directory";
+            cout<< " No such file or directory \n";
 
         else{
             string src = getArgs().substr(0, index);
@@ -490,7 +511,7 @@ using namespace std;
                         }
                     }
                 if (!found) {
-                    cout << " No such file or directory";
+                    cout << " No such file or directory \n";
                     return;
                 }
             }
@@ -504,7 +525,7 @@ using namespace std;
                 else
                     isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0,index1));
                 if (isPath == nullptr) {
-                    cout << "No such file or directory";
+                    cout << "No such file or directory \n";
                     return;
                 }
                 bool found = false;
@@ -516,7 +537,7 @@ using namespace std;
                 }
 
                 if (!found) {
-                    cout << " No such file or directory";
+                    cout << " No such file or directory \n";
                     return;
                 }
 
@@ -531,71 +552,126 @@ using namespace std;
                 destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
 
             if (destination == nullptr) {
-                cout << "No such file or directory";
+                cout << "No such file or directory \n";
                 return;
             }
             destination->addFile(fileToCopy);
         }
         //remove
         if (src=="/" | src== "")
-            cout<< "Can't remove directory";
+            cout<< "Can't remove directory \n";
 
         Directory* curr;
-        string toDelete;
+        string name;
         index = src.find_last_of("/");
         if (index==string::npos){
             curr=&fs.getWorkingDirectory();
-            toDelete=src;
+            name=src;
         }
         else {
             string path = src.substr(0,index);
-            toDelete=src.substr(index+1);
+            name=src.substr(index+1);
 
             if (path.substr(0, 1) == "/")
                 curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
             else
-                curr = getLegalPath(&fs.getRootDirectory(), fs, path);
+                curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
             if (curr== nullptr){
-                cout <<"No such file or directory";
+                cout <<"No such file or directory \n";
                 return;
             }
 
-        }curr->removeFile(toDelete);
+        }
+
+        for (BaseFile* c:curr->getChildren()){
+            if (c->getName()==name)
+                if (c->isFile()){
+                    curr->removeFile(name);
+                    return;
+                }
+                else
+                if (isWdAncestor(fs,(Directory*)c)){
+                    cout << "Can't remove directory \n";
+                    return;
+                }else
+                    curr->removeFile(name);
+
+
+
+        }
 
     }
-    string MvCommand::toString(){}
+    string MvCommand::toString(){
+        cout<< "Mv "+ getArgs()+ "\n";
+    }
 
     RmCommand::RmCommand(string args):BaseCommand(args){}
     void RmCommand::execute(FileSystem & fs){
         if (getArgs()=="/" | getArgs()== ""){
-            cout<< "Can't remove directory";
+            cout<< "Can't remove directory \n";
         }
         Directory* curr;
-        string toDelete;
+        string name;
         int index = getArgs().find_last_of("/");
         if (index==string::npos){
             curr=&fs.getWorkingDirectory();
-            toDelete=getArgs();
+            name=getArgs();
         }
         else {
             string path = getArgs().substr(0,index);
-            toDelete=getArgs().substr(index+1);
+            name=getArgs().substr(index+1);
 
             if (path.substr(0, 1) == "/")
                 curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
             else
-                curr = getLegalPath(&fs.getRootDirectory(), fs, path);
+                curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
             if (curr== nullptr){
-                cout <<"No such file or directory";
+                cout <<"No such file or directory \n";
                 return;
             }
 
-        }curr->removeFile(toDelete);
+        }
+
+        for (BaseFile* c:curr->getChildren()){
+            if (c->getName()==name)
+                if (c->isFile()){
+                    curr->removeFile(name);
+                    return;
+                }
+                else
+                    if (isWdAncestor(fs,(Directory*)c)){
+                        cout << "Can't remove directory \n";
+                        return;
+                    }else
+                        curr->removeFile(name);
+
+
+
+        }
+
+
     }
     string RmCommand::toString(){
-        return "rm";
+        return "rm"+ getArgs() +"\n";
+    }
+
+    VerboseCommand::VerboseCommand(string args):BaseCommand(args){}
+    void VerboseCommand::execute(FileSystem & fs){
+        if (getArgs()=="1")
+            verbose=1;
+        else
+        if (getArgs()=="2")
+            verbose=2;
+        else
+        if (getArgs()=="3")
+            verbose=3;
+        else
+            cout<< "Wrong verbose input \n";
+    }
+    string VerboseCommand::toString(){
+        return "verbose " +getArgs()+"\n";
     }
 
 //

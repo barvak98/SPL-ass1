@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include "Files.h"
+#include "GlobalVariables.h"
 
 using namespace std;
     //BaseFile Class
@@ -43,6 +44,8 @@ using namespace std;
     //Directory Class
     Directory::Directory(string name, Directory *parent) :BaseFile(name), children(), parent(parent){}// Constructor
     Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()){
+        if (verbose==1 || verbose==3)
+            std::cout <<"Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()";
         this->setParent(otherDir.getParent());
         vector<BaseFile *> v = otherDir.getChildren();
         for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
@@ -60,31 +63,64 @@ using namespace std;
     }// Copy Constructor
     Directory::Directory(Directory&& otherDir):BaseFile(otherDir.getName()), children(std::move(otherDir.children)),parent(otherDir.parent)
     {
+        if (verbose==1 || verbose==3)
+            std::cout <<"Directory::Directory(Directory&& otherDir)";
         otherDir.setName("");
         otherDir.parent= nullptr;
-    }
+    }// Move Constructor
     Directory& Directory::operator=(const Directory& other){
-        for (BaseFile* c:children){
-            delete c;
-            c=nullptr;
-        }
-        this->children.clear();
+        if (verbose==1 || verbose==3)
+            std::cout <<"Directory& Directory::operator=(const Directory& other)";
+        if (this!=&other) {
+            for (BaseFile *c:children) {
+                delete c;
+                c = nullptr;
+            }
+            this->children.clear();
 
-        for (BaseFile* c: other.children){
-            this->addFile(c);
+            for (BaseFile *c: other.children) {
+                this->addFile(c);
+            }
+            setParent(other.parent);
+            return *this;
         }
-        setParent(other.parent);
-        return *this;
 
+    } // Copy Assignment Operator
+    Directory& Directory::operator=(Directory &&other) {
+        if (verbose==1 || verbose==3)
+            std::cout <<"Directory& Directory::operator=(Directory &&other)";
+        if (this != &other) {
+            for (BaseFile *c:children) {
+                delete c;
+                c = nullptr;
+            }
+            this->children.clear();
+
+            for (BaseFile *c: other.children) {
+                this->addFile(c);
+            }
+            setParent(other.parent);
+
+            /*for (BaseFile *c:other.children) {
+                delete c;
+                c = nullptr;
+            }
+            other.children.clear();*/
+            other.parent= nullptr;
+            other.setName("");
+            return *this;
+        }
     }
     Directory::~Directory() {
+        if (verbose==1 || verbose==3)
+            std::cout <<"Directory::~Directory()";
         for(BaseFile* c: getChildren()){
             delete c;
             c= nullptr;
         }
         this->children.clear();
 
-    } // Destructor`
+    } // Destructor
     bool Directory::compName(BaseFile* f1, BaseFile* f2) {
             return f1->getName() < f2->getName();
         }
@@ -151,7 +187,7 @@ using namespace std;
     return "DIR      "+getName()+"     " + to_string(getSize());
 }
 
-// asjbfasfab
+//
 // Created by eilonben@wincs.cs.bgu.ac.il on 11/14/17
 //
 

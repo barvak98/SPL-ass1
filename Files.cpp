@@ -43,18 +43,18 @@ using namespace std;
 
     //Directory Class
     Directory::Directory(string name, Directory *parent) :BaseFile(name), children(), parent(parent){}// Constructor
-    Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()){
+    Directory::Directory(const Directory& otherDir ) :BaseFile(""){
         if (verbose==1 || verbose==3)
             std::cout <<"Directory::Directory(Directory& otherDir) :BaseFile(otherDir.getName()";
         this->setParent(otherDir.getParent());
-        vector<BaseFile *> v = otherDir.getChildren();
-        for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-            if(it.operator*()->isFile()){
-                File* f= new File((File&)it.operator*());
+        this->setName(otherDir.getName());
+        for (BaseFile* c:otherDir.children) {
+            if(c->isFile()){
+                File* f= new File(c->getName(),c->getSize());
                 this->addFile(f);
             }
             else{
-                Directory* d= new Directory((Directory&)it.operator*());
+                Directory* d= new Directory((Directory&)c);
                 d->setParent(this);
                 this->addFile(d);
 
@@ -79,7 +79,13 @@ using namespace std;
             this->children.clear();
 
             for (BaseFile *c: other.children) {
-                this->addFile(c);
+                if (c->isFile()){
+                    File* f= new File(c->getName(),c->getSize());
+                    this->addFile(f);
+                }else{
+                    Directory* d = new Directory(((Directory&)c));
+                    this->addFile(d);
+                }
             }
             setParent(other.parent);
             return *this;
@@ -100,14 +106,7 @@ using namespace std;
                 this->addFile(c);
             }
             setParent(other.parent);
-
-            /*for (BaseFile *c:other.children) {
-                delete c;
-                c = nullptr;
-            }
-            other.children.clear();*/
             other.parent= nullptr;
-            other.setName("");
             return *this;
         }
     }

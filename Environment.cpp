@@ -50,9 +50,7 @@ using namespace std;
         }
         commandsHistory.clear();
         commandsHistory = std::move(other.commandsHistory);
-        fs=other.fs; // TODO check
-
-
+        fs=other.fs;
     }
     void Environment::start() {
 

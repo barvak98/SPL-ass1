@@ -56,16 +56,16 @@ using namespace std;
 
 
     }
-    bool BaseCommand::isWdAncestor(FileSystem fs, Directory *d) {
+    bool BaseCommand::isWdAncestor(FileSystem& fs, Directory& d) {
         bool found=false;
-        for (BaseFile* c: d->getChildren()){
+        for (BaseFile* c: d.getChildren()){
             if (found)
                 return true;
             if (c==&fs.getWorkingDirectory())
                 return true;
             else
                 if (!c->isFile())
-                    found = isWdAncestor(fs,(Directory*)c);
+                    found = isWdAncestor(fs,(Directory&)c);
 
         }
         return false;
@@ -180,22 +180,14 @@ using namespace std;
             fs.getWorkingDirectory().addFile(newdir);
             return;
         }
-
-            Directory *isPath;
             Directory *curr;
             string path = getArgs();
             int index1 = getArgs().find_last_of("/");
             if (getArgs().substr(0, 1) == "/") {
-                isPath = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1,index1));
                 curr = &fs.getRootDirectory();
                 path = path.substr(1);
             } else {
-                isPath = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs().substr(0,index1));
                 curr = &fs.getWorkingDirectory();
-            }
-            if (isPath == nullptr) {
-                cout << "The system cannot find the path specified \n";
-                return;
             }
 
             while (path.length() != 0) {
@@ -204,6 +196,7 @@ using namespace std;
                     for (BaseFile *c: curr->getChildren()) {
                         if (c->getName() == path) {
                             cout << "The Directory already exists \n";
+                            return;
                         }
                     }
                     Directory *newdir = new Directory(path, curr);
@@ -212,26 +205,27 @@ using namespace std;
                 } else {
                     string name = path.substr(0, index);
                     path = path.substr(index + 1);
-                    vector<BaseFile *> v = curr->getChildren();
+
                     bool found = false;
-                    for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it) {
-                        if (it.operator*()->getName() == name) {
-                            if (it.operator*()->isFile()) {
+                    for (BaseFile* c: curr->getChildren()) {
+                        if (c->getName() == name) {
+                            if (c->isFile()) {
                                 cout << "The system cannot find the path specified \n";
                                 return;
                             } else {
-                                curr = (Directory *) it.operator*();
+                                curr = (Directory *) c;
                                 found = true;
                             }
 
                         }
+                    }
                         if (!found) {
                             Directory *newdir = new Directory(name, curr);
                             curr->addFile(newdir);
                             curr = newdir;
                         }
 
-                    }
+
                 }
 
             }
@@ -353,7 +347,7 @@ using namespace std;
             if (src == "/")
                 fileToCopy = &fs.getRootDirectory();
             else {
-                string path = src.substr(0, index);
+                string path = src.substr(0, index1);
                 Directory *isPath;
                 if (path.substr(0, 1) == "/")
                     isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1, index1));
@@ -390,7 +384,15 @@ using namespace std;
                 cout << "No such file or directory \n";
                 return;
             }
-            destination->addFile(fileToCopy);
+            if (fileToCopy->isFile()) {
+                File *f1 = new File(fileToCopy->getName(), fileToCopy->getSize());
+                destination->addFile(f1);
+            }
+            else{
+
+                Directory* d1 = new Directory((Directory&)fileToCopy);
+                destination->addFile(d1);
+            }
         }
 
     }
@@ -590,16 +592,19 @@ using namespace std;
         for (BaseFile *c:curr->getChildren()) {
             if (c->getName() == name)
                 if (c->isFile()) {
-                    destination->addFile(fileToCopy);
+                    File *f1 = new File(fileToCopy->getName(), fileToCopy->getSize());
+                    destination->addFile(f1);
                     curr->removeFile(name);
                     return;
-                } else if (isWdAncestor(fs, (Directory *) c)) {
+                } else if (isWdAncestor(fs, (Directory&) c)) {
                     cout << "Can't remove directory \n";
                     return;
                 } else {
-                    destination->addFile(fileToCopy);
+                    Directory* d1 = new Directory((Directory&)fileToCopy);
+                    destination->addFile(d1);
                     curr->removeFile(name);
                 }
+
 
 
         }
@@ -645,7 +650,7 @@ using namespace std;
                     return;
                 }
                 else
-                    if (isWdAncestor(fs,(Directory*)c)){
+                    if (isWdAncestor(fs,(Directory&)c)){
                         cout << "Can't remove directory \n";
                         return;
                     }else

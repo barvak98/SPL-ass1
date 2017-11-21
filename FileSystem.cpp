@@ -20,14 +20,24 @@ using namespace std;
     FileSystem::FileSystem( FileSystem &&other):rootDirectory(other.rootDirectory), workingDirectory(other.workingDirectory){
         if (verbose==1 || verbose==3)
             std::cout <<"FileSystem::FileSystem( FileSystem &&other)";
+        other.workingDirectory= nullptr;
+        other.rootDirectory= nullptr;
     }
     FileSystem* FileSystem::operator=(const FileSystem &other){
         if (verbose==1 || verbose==3)
             std::cout << "FileSystem* FileSystem::operator=(const FileSystem &other)";
+        delete rootDirectory;
+        rootDirectory=other.rootDirectory;
+        workingDirectory=other.workingDirectory;
     }
     FileSystem* FileSystem::operator=( FileSystem &&other){
         if (verbose==1 || verbose==3)
             std::cout <<"FileSystem* FileSystem::operator=( FileSystem &&other)";
+        delete rootDirectory;
+        rootDirectory=other.rootDirectory;
+        workingDirectory=other.workingDirectory;
+        other.rootDirectory= nullptr;
+        other.workingDirectory=nullptr;
     }
     Directory& FileSystem::getRootDirectory() const{
         return *rootDirectory;

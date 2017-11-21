@@ -18,7 +18,7 @@ public:
 	virtual void execute(FileSystem & fs) = 0;
 	virtual string toString() = 0;
 	void verb();
-    Directory* getLegalPath(Directory* wd,FileSystem fs, string args);
+    Directory* getLegalPath(Directory* wd,FileSystem &fs, string args);
 	bool isWdAncestor(FileSystem fs, Directory* d);
 };
 

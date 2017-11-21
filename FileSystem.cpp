@@ -10,10 +10,8 @@ using namespace std;
     FileSystem::~FileSystem(){
         if (verbose==1 || verbose==3)
             std::cout <<"FileSystem::~FileSystem(){";
-        //delete workingDirectory;
-       // delete rootDirectory;
-       // workingDirectory->setName("");
-        //workingDirectory->setParent(nullptr);
+        delete rootDirectory;
+
     }
     FileSystem::FileSystem(const FileSystem &other):rootDirectory(other.rootDirectory), workingDirectory(other.workingDirectory){
         if (verbose==1 || verbose==3)

@@ -142,7 +142,7 @@ using namespace std;
     } // Change the parent of this directory
     void Directory::addFile(BaseFile* file){
         if (!(file->isFile()))
-            ((Directory&)file).setParent(this);
+            ((Directory*)file)->setParent(this);
 
         children.push_back(file);
         sortByName();

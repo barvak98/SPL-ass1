@@ -14,7 +14,7 @@ using namespace std;
 
     void BaseCommand::verb(){
         if (verbose==2 || verbose==3)
-            cout<< this->toString() + "\n";
+            cout<< this->toString();
     }
 
     Directory* BaseCommand::getLegalPath(Directory* wd, FileSystem &fs, string args) {
@@ -406,6 +406,12 @@ using namespace std;
                 cout << "No such file or directory \n";
                 return;
             }
+            for(BaseFile* c: destination->getChildren()){
+                if( c->getName()== fileToCopy->getName()){
+                    cout<< "file already exist \n";
+                    return;
+                }
+            }
             if (fileToCopy->isFile()) {
                 File *f1 = new File(fileToCopy->getName(), fileToCopy->getSize());
                 destination->addFile(f1);
@@ -419,7 +425,7 @@ using namespace std;
 
     }
     string CpCommand:: toString(){
-        return "CpCommand "+getArgs()+"\n";
+        return "cp"+getArgs()+"\n";
     }
 
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
@@ -483,13 +489,14 @@ using namespace std;
     void HistoryCommand::execute(FileSystem & fs){
         int counter =0;
         for(BaseCommand* c: history){
-
-            cout<< to_string(counter) + c->toString() + "\n";
+            cout<< counter;
+            cout<< "    ";
+            cout<< c->toString();
             counter++;
         }
     }
     string HistoryCommand::toString(){
-        cout << "history "+getArgs()+"\n";
+        cout << "history " << "\n";
     }
 
     ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(history){}
@@ -514,7 +521,6 @@ using namespace std;
     }
 
     MvCommand::MvCommand(string args):BaseCommand(args){}
-
     void MvCommand::execute(FileSystem & fs) {
         string src;
         Directory *destination;
@@ -590,6 +596,12 @@ using namespace std;
             cout << "No such file or directory \n";
             return;
         }
+        for(BaseFile* c: destination->getChildren()){
+            if( c->getName()== fileToCopy->getName()){
+                cout<< "file already exist \n";
+                return;
+            }
+        }
 
 
         //remove
@@ -647,9 +659,6 @@ using namespace std;
 
 
     }
-
-
-
     string MvCommand::toString(){
         cout<< "Mv "+ getArgs()+ "\n";
     }
@@ -722,8 +731,9 @@ using namespace std;
         else
             cout<< "Wrong verbose input \n";
     }
-    string VerboseCommand::toString(){
-        return "verbose " +getArgs()+"\n";
+    string VerboseCommand::toString() {
+        string s = "verbose " + getArgs() + "\n";
+        return s;
     }
 
 //

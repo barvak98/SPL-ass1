@@ -35,7 +35,7 @@ using namespace std;
     }
 
     string File::toString(){
-        return "FILE      "+getName()+"     " + to_string(getSize());
+        return "FILE     "+getName()+"     " + to_string(getSize());
     }
 
     File::~File()=default;

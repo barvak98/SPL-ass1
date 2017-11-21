@@ -54,9 +54,10 @@ using namespace std;
                 this->addFile(f);
             }
             else{
-                Directory* d= new Directory((Directory&)c);
-                d->setParent(this);
-                this->addFile(d);
+                Directory* d1 = (Directory*) c;
+                Directory* d2= new Directory(*d1);
+                d2->setParent(this);
+                this->addFile(d2);
 
             }
         }

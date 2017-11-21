@@ -19,7 +19,7 @@ public:
 	virtual string toString() = 0;
 	void verb();
     Directory* getLegalPath(Directory* wd,FileSystem &fs, string args);
-	bool isWdAncestor(FileSystem &fs, Directory &d);
+	bool isWdAncestor(FileSystem &fs, Directory *d);
 };
 
 class PwdCommand : public BaseCommand {

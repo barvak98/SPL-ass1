@@ -191,9 +191,9 @@ using namespace std;
     }
     string Directory::toString(){
         string s = "DIR";
-        s+="\t\t";
+        s+="\t";
         s+=getName();
-        s+="\t\t";
+        s+="\t";
         s+=to_string(getSize());
     return s;
 }

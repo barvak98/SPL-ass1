@@ -81,7 +81,7 @@ using namespace std;
 
     } // Every derived class should implement this function according to the document (pdf)
     string PwdCommand::toString() {
-        return "pwdCommand \n";
+        return "pwd\n";
     }
     PwdCommand::~PwdCommand() {}
 
@@ -92,7 +92,7 @@ using namespace std;
         if (getArgs().substr(0,1)=="/") {
             Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
             if (isLegal == nullptr) {
-                cout << "The system cannot find the path specified \n ";
+                cout << "The system cannot find the path specified\n";
             }
             else
             fs.setWorkingDirectory(isLegal);
@@ -100,7 +100,7 @@ using namespace std;
         }else {
             Directory* isLegal = getLegalPath(tempWorkDirectory, fs, getArgs());
             if (isLegal == nullptr) {
-                cout << "The system cannot find the path specified \n";
+                cout << "The system cannot find the path specified\n";
             }
             else
             fs.setWorkingDirectory(isLegal);
@@ -142,7 +142,7 @@ using namespace std;
                      isLegal = getLegalPath(&fs.getWorkingDirectory(), fs, path);
                 }
                 if (isLegal == nullptr)
-                    cout << "The system cannot find the path specified \n";
+                    cout << "The system cannot find the path specified\n";
                 else{
                     isLegal->sortBySize();
                     vector<BaseFile *> v = isLegal->getChildren();
@@ -158,7 +158,7 @@ using namespace std;
                 else
                     isLegal = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs());
                 if (isLegal == nullptr)
-                    cout << "The system cannot find the path specified \n";
+                    cout << "The system cannot find the path specified\n";
                 else{
                     for (BaseFile* c: isLegal->getChildren()){
                         cout <<"" + c -> toString() + "\n";
@@ -170,6 +170,8 @@ using namespace std;
 
     }
     string LsCommand::toString() {
+        if(getArgs()=="")
+            return "ls\n";
         return "ls "+getArgs()+"\n";
     }
     LsCommand::~LsCommand() {}
@@ -179,14 +181,14 @@ using namespace std;
     }
     void MkdirCommand::execute(FileSystem & fs) {
         if (getArgs() == "/") {
-            cout << "The directory already exists \n";
+            cout << "The directory already exists\n";
             return;
         }
         size_t index = getArgs().find("/");
         if (index == string::npos) {
             for (BaseFile *c: fs.getWorkingDirectory().getChildren()) {
                 if (c->getName() == getArgs()) {
-                    cout << "The Directory already exists \n";
+                    cout << "The directory already exists\n";
                 }
             }
             Directory *newdir = new Directory(getArgs(), &fs.getWorkingDirectory());
@@ -208,7 +210,7 @@ using namespace std;
                 if (index == string::npos) {
                     for (BaseFile *c: curr->getChildren()) {
                         if (c->getName() == path) {
-                            cout << "The Directory already exists \n";
+                            cout << "The directory already exists\n";
                             return;
                         }
                     }
@@ -223,7 +225,7 @@ using namespace std;
                     for (BaseFile* c: curr->getChildren()) {
                         if (c->getName() == name) {
                             if (c->isFile()) {
-                                cout << "The system cannot find the path specified \n";
+                                cout << "The system cannot find the path specified\n";
                                 return;
                             } else {
                                 curr = (Directory *) c;
@@ -261,7 +263,7 @@ using namespace std;
                 name = getArgs().substr(0,index2);
             for(BaseFile* c: fs.getWorkingDirectory().getChildren()) {
                 if (c->getName() == name) {
-                    cout << "File already exists \n";
+                    cout << "File already exists\n";
                     return;
                 }
             }
@@ -299,7 +301,7 @@ using namespace std;
             }
 
             if (fileName == "/") {
-                cout << "Cannot name file as the root directory \n";
+                cout << "Cannot name file as the root directory\n";
             }
             Directory *dir;
             if (getArgs().substr(0, 1) == "/") {
@@ -308,7 +310,7 @@ using namespace std;
                 dir = getLegalPath(&fs.getWorkingDirectory(), fs, path);
             }
             if (dir == nullptr){
-                cout << "The system cannot find the path specified \n";
+                cout << "The system cannot find the path specified\n";
                 return;
             }
 
@@ -317,7 +319,7 @@ using namespace std;
             bool found = false;
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it)
                 if (it.operator*()->getName() == fileName) {
-                    cout << "The file already exists \n";
+                    cout << "File already exists\n";
                     found = true;
                 }
             if (!found) {
@@ -339,7 +341,7 @@ using namespace std;
     void CpCommand:: execute(FileSystem & fs) {
         size_t index = getArgs().find(" ");
         if (index == string::npos)
-            cout << " No such file or directory \n";
+            cout << "No such file or directory\n";
 
         else {
             string src = getArgs().substr(0, index);
@@ -361,7 +363,7 @@ using namespace std;
                         }
                     }
                 if (!found) {
-                    cout << " No such file or directory \n";
+                    cout << "No such file or directory\n";
                     return;
                 }
             }
@@ -380,7 +382,7 @@ using namespace std;
                     else
                         isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
                     if (isPath == nullptr) {
-                        cout << "No such file or directory \n";
+                        cout << "No such file or directory\n";
                         return;
                     }
                 }
@@ -393,7 +395,7 @@ using namespace std;
                 }
 
                 if (!found) {
-                    cout << " No such file or directory \n";
+                    cout << "No such file or directory\n";
                     return;
                 }
 
@@ -408,7 +410,7 @@ using namespace std;
                 destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
 
             if (destination == nullptr) {
-                cout << "No such file or directory \n";
+                cout << "No such file or directory\n";
                 return;
             }
             for(BaseFile* c: destination->getChildren()){
@@ -429,7 +431,7 @@ using namespace std;
 
     }
     string CpCommand:: toString(){
-        return "cp"+getArgs()+"\n";
+        return "cp "+getArgs()+"\n";
     }
     CpCommand::~CpCommand() {}
 
@@ -438,7 +440,7 @@ using namespace std;
 
         size_t index = getArgs().find(" ");
         if(index ==string::npos) {
-            cout << " No such file or directory\n";
+            cout << "No such file or directory\n";
             return;
         }
         string oldpath = getArgs().substr(0, index);
@@ -502,13 +504,13 @@ using namespace std;
         size_t counter =0;
         for(BaseCommand* c: history){
             cout<< counter;
-            cout<< "    ";
+            cout<< "\t";
             cout<< c->toString();
             counter++;
         }
     }
     string HistoryCommand::toString(){
-        return "history \n";
+        return "history\n";
     }
     HistoryCommand::~HistoryCommand() {}
 
@@ -516,7 +518,7 @@ using namespace std;
     void ExecCommand::execute(FileSystem & fs){
         size_t cNum = std::stoi(getArgs());
         if (cNum<0 || cNum > history.size() || history.empty()){
-            cout<< "Command not found \n";
+            cout<< "Command not found\n";
             return;
         }
         history[cNum]->execute(fs);
@@ -529,7 +531,7 @@ using namespace std;
     ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
     void ErrorCommand::execute(FileSystem & fs){
         string args = getArgs().substr(0,getArgs().find_first_of(" "));
-        cout << args + ": Unknown Command"+"\n";
+        cout << args + ": Unknown command"+"\n";
     }
     string ErrorCommand::toString(){
         return getArgs()+"\n";
@@ -543,7 +545,7 @@ using namespace std;
         BaseFile *fileToCopy;
         size_t index = getArgs().find(" ");
         if (index == string::npos) {
-            cout << " No such file or directory \n";
+            cout << "No such file or directory\n";
             return;
         }
 
@@ -566,12 +568,12 @@ using namespace std;
                 }
             }
             if (!found) {
-                cout << " No such file or directory \n";
+                cout << "No such file or directory\n";
                 return;
             }
         }
         if (src == "/") {
-            cout << "Can't move directory \n";
+            cout << "Can't move directory\n";
             return;
         }
         if (index1 == 0) {
@@ -579,7 +581,7 @@ using namespace std;
             for (BaseFile *c:curr->getChildren()) {
                 if (c->getName() == src.substr(1)) {
                     if (c == &fs.getWorkingDirectory()) {
-                        cout << "Can't move directory \n";
+                        cout << "Can't move directory\n";
                         return;
                     }
 
@@ -594,7 +596,7 @@ using namespace std;
         else
             isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
         if (isPath == nullptr) {
-            cout << "No such file or directory \n";
+            cout << "No such file or directory\n";
             return;
         }
         bool found = false;
@@ -606,7 +608,7 @@ using namespace std;
         }
 
         if (!found) {
-            cout << " No such file or directory \n";
+            cout << "No such file or directory\n";
             return;
         }
 
@@ -618,7 +620,7 @@ using namespace std;
             destination = getLegalPath(&fs.getWorkingDirectory(), fs, des);
 
         if (destination == nullptr) {
-            cout << "No such file or directory \n";
+            cout << "No such file or directory\n";
             return;
         }
         for (BaseFile *c: destination->getChildren()) {
@@ -630,7 +632,7 @@ using namespace std;
 
         //remove
         if ((src == "/") || (src == "")) {
-            cout << "Can't remove directory \n";
+            cout << "Can't remove directory\n";
             return;
         }
 
@@ -654,7 +656,7 @@ using namespace std;
                     curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
                 if (curr == nullptr) {
-                    cout << "No such file or directory \n";
+                    cout << "No such file or directory\n";
                     return;
                 }
 
@@ -688,14 +690,14 @@ using namespace std;
 
     }
     string MvCommand::toString(){
-        return "Mv "+ getArgs()+ "\n";
+        return "mv "+ getArgs()+ "\n";
     }
     MvCommand::~MvCommand() {}
 
     RmCommand::RmCommand(string args):BaseCommand(args){}
     void RmCommand::execute(FileSystem & fs){
         if ((getArgs()=="/") || (getArgs()== "")){
-            cout<< "Can't remove directory \n";
+            cout<< "Can't remove directory\n";
         }
         Directory* curr;
         string name;
@@ -708,7 +710,7 @@ using namespace std;
                     return;
                 }
             }
-                cout << "No such file or directory \n";
+                cout << "No such file or directory\n";
                 return;
 
 
@@ -727,7 +729,7 @@ using namespace std;
                     curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
                 if (curr == nullptr) {
-                    cout << "No such file or directory \n";
+                    cout << "No such file or directory\n";
                     return;
                 }
 
@@ -741,7 +743,7 @@ using namespace std;
                     curr->removeFile(name);
                     return;
                 } else if (isWdAncestor(fs, (Directory *) c) || c==&fs.getWorkingDirectory() ) {
-                    cout << "Can't remove directory \n";
+                    cout << "Can't remove directory\n";
                     return;
                 } else
                     curr->removeFile(name);

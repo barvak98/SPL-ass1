@@ -35,7 +35,12 @@ using namespace std;
     }
 
     string File::toString(){
-        return "FILE     "+getName()+"     " + to_string(getSize());
+        string s = "FILE";
+        s+="    ";
+        s+=getName();
+        s+="    ";
+        s+=to_string(getSize());
+        return s;
     }
 
     File::~File()=default;
@@ -185,7 +190,12 @@ using namespace std;
         return "";
     }
     string Directory::toString(){
-    return "DIR      "+getName()+"     " + to_string(getSize());
+        string s = "DIR";
+        s+="     ";
+        s+=getName();
+        s+="    ";
+        s+=to_string(getSize());
+    return s;
 }
 
 //

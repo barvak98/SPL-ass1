@@ -177,7 +177,7 @@ using namespace std;
                 }
 
                else {
-                    BaseCommand *err = new ErrorCommand(cmd);
+                    BaseCommand *err = new ErrorCommand(input);
                     err->verb();
                     err->execute(fs);
                     commandsHistory.push_back(err);

@@ -11,11 +11,11 @@ using namespace std;
     string BaseCommand::getArgs(){
         return args;
     }
-
     void BaseCommand::verb(){
         if (verbose==2 || verbose==3)
             cout<< this->toString();
     }
+    BaseCommand::~BaseCommand() {}
 
     Directory* BaseCommand::getLegalPath(Directory* wd, FileSystem &fs, string args) {
         if (args.length()==0)
@@ -83,6 +83,7 @@ using namespace std;
     string PwdCommand::toString() {
         return "pwdCommand \n";
     }
+    PwdCommand::~PwdCommand() {}
 
     CdCommand::CdCommand(string args):BaseCommand(args){}
     void CdCommand::execute(FileSystem & fs) {
@@ -111,6 +112,7 @@ using namespace std;
     string CdCommand::toString(){
         return "cd " + getArgs()+"\n";
     }
+    CdCommand::~CdCommand() {}
 
     LsCommand::LsCommand(string args):BaseCommand(args){}
     void LsCommand::execute(FileSystem &fs) {
@@ -171,6 +173,7 @@ using namespace std;
     string LsCommand::toString() {
         return "ls "+getArgs()+"\n";
     }
+    LsCommand::~LsCommand() {}
 
     MkdirCommand::MkdirCommand(string args):BaseCommand(args){
 
@@ -245,6 +248,7 @@ using namespace std;
     string MkdirCommand::toString(){
         return "mkdir "+getArgs()+"\n";
     }
+    MkdirCommand::~MkdirCommand() {}
 
     MkfileCommand::MkfileCommand(string args):BaseCommand(args){}
     void MkfileCommand::execute(FileSystem &fs) {
@@ -252,7 +256,7 @@ using namespace std;
         if (index == string::npos) {
             string name;
             size_t index2 = getArgs().find_first_of(" ");
-            if (index2==-1)
+            if (index2==string::npos)
                 name = getArgs();
             else
                 name = getArgs().substr(0,index2);
@@ -330,6 +334,7 @@ using namespace std;
     string MkfileCommand::toString() {
             return "mkfile " + getArgs() +"\n" ;
         }
+    MkfileCommand::~MkfileCommand() {}
 
     CpCommand ::CpCommand(string args): BaseCommand(args){}
     void CpCommand:: execute(FileSystem & fs) {
@@ -409,7 +414,6 @@ using namespace std;
             }
             for(BaseFile* c: destination->getChildren()){
                 if( c->getName()== fileToCopy->getName()){
-                    cout<< "file already exist \n";
                     return;
                 }
             }
@@ -428,6 +432,7 @@ using namespace std;
     string CpCommand:: toString(){
         return "cp"+getArgs()+"\n";
     }
+    CpCommand::~CpCommand() {}
 
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
     void RenameCommand::execute(FileSystem & fs){
@@ -485,6 +490,7 @@ using namespace std;
     string RenameCommand::toString(){
         return "rename "+getArgs()+"\n";
     }
+    RenameCommand::~RenameCommand() {}
 
     HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(history){}
     void HistoryCommand::execute(FileSystem & fs){
@@ -499,6 +505,7 @@ using namespace std;
     string HistoryCommand::toString(){
         return "history \n";
     }
+    HistoryCommand::~HistoryCommand() {}
 
     ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(history){}
     void ExecCommand::execute(FileSystem & fs){
@@ -512,14 +519,17 @@ using namespace std;
     string ExecCommand::toString(){
         return "exec "+getArgs()+"\n";
     }
+    ExecCommand::~ExecCommand() {}
 
     ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
     void ErrorCommand::execute(FileSystem & fs){
-        cout << getArgs() + ": Unknown Command"+"\n";
+        string args = getArgs().substr(0,getArgs().find_first_of(" "));
+        cout << args + ": Unknown Command"+"\n";
     }
     string ErrorCommand::toString(){
-        return "error "+getArgs()+"\n";
+        return getArgs()+"\n";
     }
+    ErrorCommand::~ErrorCommand() {}
 
     MvCommand::MvCommand(string args):BaseCommand(args){}
     void MvCommand::execute(FileSystem & fs) {
@@ -599,7 +609,6 @@ using namespace std;
         }
         for(BaseFile* c: destination->getChildren()){
             if( c->getName()== fileToCopy->getName()){
-                cout<< "file already exist \n";
                 return;
             }
         }
@@ -663,6 +672,7 @@ using namespace std;
     string MvCommand::toString(){
         return "Mv "+ getArgs()+ "\n";
     }
+    MvCommand::~MvCommand() {}
 
     RmCommand::RmCommand(string args):BaseCommand(args){}
     void RmCommand::execute(FileSystem & fs){
@@ -716,6 +726,7 @@ using namespace std;
     string RmCommand::toString(){
         return "rm"+ getArgs() +"\n";
     }
+    RmCommand::~RmCommand() {}
 
     VerboseCommand::VerboseCommand(string args):BaseCommand(args){}
     void VerboseCommand::execute(FileSystem & fs){
@@ -728,12 +739,16 @@ using namespace std;
         if (getArgs()=="3")
             verbose=3;
         else
+        if (getArgs()=="0")
+            verbose=0;
+        else
             cout<< "Wrong verbose input \n";
     }
     string VerboseCommand::toString() {
         string s = "verbose " + getArgs() + "\n";
         return s;
     }
+    VerboseCommand::~VerboseCommand() {}
 
 //
 // Created by eilonben@wincs.cs.bgu.ac.il on 11/14/17.

@@ -171,7 +171,7 @@ using namespace std;
     }
     string LsCommand::toString() {
         if(getArgs()=="")
-            return "ls\n";
+          return "ls\n";
         return "ls "+getArgs()+"\n";
     }
     LsCommand::~LsCommand() {}
@@ -370,7 +370,6 @@ using namespace std;
             if (src == "/")
                 fileToCopy = &fs.getRootDirectory();
             else {
-
                 string path = src.substr(0, index1);
                 Directory *isPath;
                 if (index1 == string::npos){
@@ -510,7 +509,7 @@ using namespace std;
         }
     }
     string HistoryCommand::toString(){
-        return "history\n";
+        return "history \n";
     }
     HistoryCommand::~HistoryCommand() {}
 
@@ -541,6 +540,7 @@ using namespace std;
     MvCommand::MvCommand(string args):BaseCommand(args){}
     void MvCommand::execute(FileSystem & fs) {
         string src;
+        bool found = false;
         Directory *destination;
         BaseFile *fileToCopy;
         size_t index = getArgs().find(" ");
@@ -553,9 +553,14 @@ using namespace std;
         string des = getArgs().substr((index + 1));
         size_t index1 = src.find_last_of("/");
         if (index1 == string::npos) {
+            if (src==".."){
+                cout << "Can't move directory\n";
+                return;
+            }
+
 
             vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
-            bool found = false;
+
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end() && !found; ++it) {
                 if (it.operator*()->getName() == src) {
                     found = true;
@@ -580,39 +585,41 @@ using namespace std;
             Directory *curr = &fs.getRootDirectory();
             for (BaseFile *c:curr->getChildren()) {
                 if (c->getName() == src.substr(1)) {
-                    if (c == &fs.getWorkingDirectory()) {
-                        cout << "Can't move directory\n";
-                        return;
-                    }
+                    if (!c->isFile())
+                        if (c == &fs.getWorkingDirectory() || isWdAncestor(fs, (Directory*)c)) {
+                            cout << "Can't move directory\n";
+                            return;
+                        }
 
                 }
             }
         }
-        string path = src.substr(0, index1);
-        Directory *isPath;
+        if (index1 !=string::npos) {
+            string path = src.substr(0, index1);
+            Directory *isPath;
 
-        if (path.substr(0, 1) == "/")
-            isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1, index1));
-        else
-            isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
-        if (isPath == nullptr) {
-            cout << "No such file or directory\n";
-            return;
-        }
-        bool found = false;
-        for (BaseFile *c: isPath->getChildren()) {
-            if (c->getName() == src.substr(index1 + 1)) {
-                found = true;
-                fileToCopy = c;
+            if (path.substr(0, 1) == "/")
+                isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1, index1));
+            else
+                isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
+            if (isPath == nullptr) {
+                cout << "No such file or directory\n";
+                return;
             }
+            bool found = false;
+            for (BaseFile *c: isPath->getChildren()) {
+                if (c->getName() == src.substr(index1 + 1)) {
+                    found = true;
+                    fileToCopy = c;
+                }
+            }
+
+            if (!found) {
+                cout << "No such file or directory\n";
+                return;
+            }
+
         }
-
-        if (!found) {
-            cout << "No such file or directory\n";
-            return;
-        }
-
-
         if (des.substr(0, 1) == "/")
             destination = getLegalPath(&fs.getRootDirectory(), fs, des.substr(1));
 

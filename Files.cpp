@@ -36,9 +36,9 @@ using namespace std;
 
     string File::toString(){
         string s = "FILE";
-        s+="    ";
+        s+="\t";
         s+=getName();
-        s+="    ";
+        s+="\t";
         s+=to_string(getSize());
         return s;
     }
@@ -191,9 +191,9 @@ using namespace std;
     }
     string Directory::toString(){
         string s = "DIR";
-        s+="     ";
+        s+="\t\t";
         s+=getName();
-        s+="    ";
+        s+="\t\t";
         s+=to_string(getSize());
     return s;
 }

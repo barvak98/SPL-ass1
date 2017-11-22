@@ -87,7 +87,7 @@ using namespace std;
 
     CdCommand::CdCommand(string args):BaseCommand(args){}
     void CdCommand::execute(FileSystem & fs) {
-        Directory& tempWorkDirectory=fs.getWorkingDirectory();
+        Directory* tempWorkDirectory=&fs.getWorkingDirectory();
 
         if (getArgs().substr(0,1)=="/") {
             Directory *isLegal = getLegalPath(&fs.getRootDirectory(), fs, getArgs().substr(1));
@@ -98,13 +98,12 @@ using namespace std;
             fs.setWorkingDirectory(isLegal);
 
         }else {
-            Directory* isLegal = getLegalPath(&tempWorkDirectory, fs, getArgs());
+            Directory* isLegal = getLegalPath(tempWorkDirectory, fs, getArgs());
             if (isLegal == nullptr) {
                 cout << "The system cannot find the path specified \n";
             }
             else
             fs.setWorkingDirectory(isLegal);
-            // TODO: delete isLegal here
         }
 
 
@@ -453,8 +452,11 @@ using namespace std;
         if (index1==string::npos){
             path = &fs.getWorkingDirectory();
             for (BaseFile* c:path->getChildren()){
+                if (c->getName()==newname)
+                    return;
                 if (c->getName()==oldpath){
                     c->setName(newname);
+                    path->sortByName();
                     return;
                 }
             }
@@ -474,12 +476,15 @@ using namespace std;
                 return;
             }
             for (BaseFile* c:path->getChildren()) {
+                if (c->getName()==newname)
+                    return;
                 if (c->getName() == oldname) {
                     if(c==&fs.getWorkingDirectory()){
-                        cout << "Can't rename directory\n";
+                        cout << "Can't rename the working directory\n";
                         return;
                     }
                     c->setName(newname);
+                    path->sortByName();
                     return;
                 }
             }
@@ -565,37 +570,46 @@ using namespace std;
                 return;
             }
         }
-        if (src == "/")
-            fileToCopy = &fs.getRootDirectory();
-        else {
-            string path = src.substr(0, index1);
-            Directory *isPath;
-            if (index1 == string::npos) {
-                isPath = &fs.getWorkingDirectory();
-            } else {
-                if (path.substr(0, 1) == "/")
-                    isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1, index1));
-                else
-                    isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
-                if (isPath == nullptr) {
-                    cout << "No such file or directory \n";
-                    return;
-                }
-                bool found = false;
-                for (BaseFile *c: isPath->getChildren()) {
-                    if (c->getName() == src.substr(index1 + 1)) {
-                        found = true;
-                        fileToCopy = c;
+        if (src == "/") {
+            cout << "Can't move directory \n";
+            return;
+        }
+        if (index1 == 0) {
+            Directory *curr = &fs.getRootDirectory();
+            for (BaseFile *c:curr->getChildren()) {
+                if (c->getName() == src.substr(1)) {
+                    if (c == &fs.getWorkingDirectory()) {
+                        cout << "Can't move directory \n";
+                        return;
                     }
-                }
 
-                if (!found) {
-                    cout << " No such file or directory \n";
-                    return;
                 }
-
             }
         }
+        string path = src.substr(0, index1);
+        Directory *isPath;
+
+        if (path.substr(0, 1) == "/")
+            isPath = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1, index1));
+        else
+            isPath = getLegalPath(&fs.getWorkingDirectory(), fs, path.substr(0, index1));
+        if (isPath == nullptr) {
+            cout << "No such file or directory \n";
+            return;
+        }
+        bool found = false;
+        for (BaseFile *c: isPath->getChildren()) {
+            if (c->getName() == src.substr(index1 + 1)) {
+                found = true;
+                fileToCopy = c;
+            }
+        }
+
+        if (!found) {
+            cout << " No such file or directory \n";
+            return;
+        }
+
 
         if (des.substr(0, 1) == "/")
             destination = getLegalPath(&fs.getRootDirectory(), fs, des.substr(1));
@@ -607,8 +621,8 @@ using namespace std;
             cout << "No such file or directory \n";
             return;
         }
-        for(BaseFile* c: destination->getChildren()){
-            if( c->getName()== fileToCopy->getName()){
+        for (BaseFile *c: destination->getChildren()) {
+            if (c->getName() == fileToCopy->getName()) {
                 return;
             }
         }
@@ -627,21 +641,25 @@ using namespace std;
             curr = &fs.getWorkingDirectory();
             name = src;
         } else {
-            string path = src.substr(0, index1);
-            name = src.substr(index + 1);
+            if (index == 0) {
+                curr = &fs.getRootDirectory();
+                name = getArgs().substr(1);
+            } else {
+                string path = src.substr(0, index1);
+                name = src.substr(index + 1);
 
-            if (path.substr(0, 1) == "/")
-                curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
-            else
-                curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
+                if (path.substr(0, 1) == "/")
+                    curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+                else
+                    curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
-            if (curr == nullptr) {
-                cout << "No such file or directory \n";
-                return;
+                if (curr == nullptr) {
+                    cout << "No such file or directory \n";
+                    return;
+                }
+
             }
-
         }
-
         for (BaseFile *c:curr->getChildren()) {
             if (c->getName() == name) {
                 if (c->isFile()) {
@@ -654,8 +672,8 @@ using namespace std;
                 } else {
                     Directory *d1 = (Directory *) fileToCopy;
 
-                    if (isWdAncestor(fs, d1)) {
-                        cout << "Can't remove directory \n";
+                    if (isWdAncestor(fs, d1) || fileToCopy == &fs.getWorkingDirectory()) {
+                        cout << "Can't move directory \n";
                         return;
                     } else {
                         Directory *d2 = new Directory(*d1);
@@ -683,35 +701,46 @@ using namespace std;
         string name;
         size_t index = getArgs().find_last_of("/");
         if (index==string::npos){
-            curr = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs());
-            if (curr== nullptr) {
+            name=getArgs();
+            for (BaseFile* c: fs.getWorkingDirectory().getChildren()){
+                if (c->getName()==name) {
+                    fs.getWorkingDirectory().removeFile(name);
+                    return;
+                }
+            }
                 cout << "No such file or directory \n";
                 return;
-            }
-            name=getArgs();
+
+
         }
         else {
-            string path = getArgs().substr(0,index);
-            name=getArgs().substr(index+1);
+            if (index == 0) {
+                curr = &fs.getRootDirectory();
+                name = getArgs().substr(1);
+            } else {
+                string path = getArgs().substr(0, index);
+                name = getArgs().substr(index + 1);
 
-            if (path.substr(0, 1) == "/")
-                curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
-            else
-                curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
+                if (path.substr(0, 1) == "/")
+                    curr = getLegalPath(&fs.getRootDirectory(), fs, path.substr(1));
+                else
+                    curr = getLegalPath(&fs.getWorkingDirectory(), fs, path);
 
-            if (curr== nullptr){
-                cout <<"No such file or directory \n";
-                return;
+                if (curr == nullptr) {
+                    cout << "No such file or directory \n";
+                    return;
+                }
+
             }
-
         }
+
 
         for (BaseFile* c:curr->getChildren()){
             if (c->getName()==name) {
                 if (c->isFile()) {
                     curr->removeFile(name);
                     return;
-                } else if (isWdAncestor(fs, (Directory *) c)) {
+                } else if (isWdAncestor(fs, (Directory *) c) || c==&fs.getWorkingDirectory() ) {
                     cout << "Can't remove directory \n";
                     return;
                 } else
@@ -724,7 +753,7 @@ using namespace std;
 
     }
     string RmCommand::toString(){
-        return "rm"+ getArgs() +"\n";
+        return "rm "+ getArgs() +"\n";
     }
     RmCommand::~RmCommand() {}
 

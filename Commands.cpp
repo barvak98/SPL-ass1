@@ -29,7 +29,7 @@ using namespace std;
             else
                 return getLegalPath(wd->getParent(), fs , "");
         }
-        int index = args.find("/");
+        size_t index = args.find("/");
         if (index!=string::npos) {
             string name = args.substr(0, index);
             vector<BaseFile *> v = wd->getChildren();
@@ -117,8 +117,9 @@ using namespace std;
         if (getArgs().length()==0){
             vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
             for (std::vector<BaseFile *>::iterator it = v.begin(); it != v.end(); ++it) {
-                cout << it.operator*()->toString()+"\n";
+                cout << it.operator*()->toString() << "\n";
             }
+            return;
         }
         else
         if (getArgs()=="-s"){
@@ -179,7 +180,7 @@ using namespace std;
             cout << "The directory already exists \n";
             return;
         }
-        int index = getArgs().find("/");
+        size_t index = getArgs().find("/");
         if (index == string::npos) {
             for (BaseFile *c: fs.getWorkingDirectory().getChildren()) {
                 if (c->getName() == getArgs()) {
@@ -192,7 +193,7 @@ using namespace std;
         }
             Directory *curr;
             string path = getArgs();
-            int index1 = getArgs().find_last_of("/");
+       // size_t index1 = getArgs().find_last_of("/");
             if (getArgs().substr(0, 1) == "/") {
                 curr = &fs.getRootDirectory();
                 path = path.substr(1);
@@ -201,7 +202,7 @@ using namespace std;
             }
 
             while (path.length() != 0) {
-                int index = path.find("/");
+                size_t index = path.find("/");
                 if (index == string::npos) {
                     for (BaseFile *c: curr->getChildren()) {
                         if (c->getName() == path) {
@@ -247,10 +248,10 @@ using namespace std;
 
     MkfileCommand::MkfileCommand(string args):BaseCommand(args){}
     void MkfileCommand::execute(FileSystem &fs) {
-        int index = getArgs().find_last_of("/");
+        size_t index = getArgs().find_last_of("/");
         if (index == string::npos) {
             string name;
-            int index2 = getArgs().find_first_of(" ");
+            size_t index2 = getArgs().find_first_of(" ");
             if (index2==-1)
                 name = getArgs();
             else
@@ -263,7 +264,7 @@ using namespace std;
             }
                 string file = getArgs().substr((index + 1));
 
-                int index1 = file.find(" ");
+            size_t index1 = file.find(" ");
                 string size="0";
                 string fileName;
                 if (index1 == string::npos) {
@@ -283,7 +284,7 @@ using namespace std;
             string path = getArgs().substr(0, index);
             string file = getArgs().substr((index + 1));
 
-            int index1 = file.find(" ");
+            size_t index1 = file.find(" ");
             string size="0";
             string fileName;
             if (index1 == string::npos) {
@@ -332,14 +333,14 @@ using namespace std;
 
     CpCommand ::CpCommand(string args): BaseCommand(args){}
     void CpCommand:: execute(FileSystem & fs) {
-        int index = getArgs().find(" ");
+        size_t index = getArgs().find(" ");
         if (index == string::npos)
             cout << " No such file or directory \n";
 
         else {
             string src = getArgs().substr(0, index);
             string des = getArgs().substr((index + 1));
-            int index1 = src.find_last_of("/");
+            size_t index1 = src.find_last_of("/");
             BaseFile* fileToCopy;
             if (index1 == string::npos) {
 
@@ -431,7 +432,7 @@ using namespace std;
     RenameCommand::RenameCommand(string args):BaseCommand(args){}
     void RenameCommand::execute(FileSystem & fs){
 
-        int index = getArgs().find(" ");
+        size_t index = getArgs().find(" ");
         if(index ==string::npos) {
             cout << " No such file or directory\n";
             return;
@@ -443,7 +444,7 @@ using namespace std;
             cout << "Can't rename directory\n";
             return;
         }
-        int index1= oldpath.find_last_of("/");
+        size_t index1= oldpath.find_last_of("/");
         if (index1==string::npos){
             path = &fs.getWorkingDirectory();
             for (BaseFile* c:path->getChildren()){
@@ -487,7 +488,7 @@ using namespace std;
 
     HistoryCommand::HistoryCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args), history(history){}
     void HistoryCommand::execute(FileSystem & fs){
-        int counter =0;
+        size_t counter =0;
         for(BaseCommand* c: history){
             cout<< counter;
             cout<< "    ";
@@ -496,12 +497,12 @@ using namespace std;
         }
     }
     string HistoryCommand::toString(){
-        cout << "history " << "\n";
+        return "history \n";
     }
 
     ExecCommand::ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args) , history(history){}
     void ExecCommand::execute(FileSystem & fs){
-        int cNum = std::stoi(getArgs());
+        size_t cNum = std::stoi(getArgs());
         if (cNum<0 || cNum > history.size() || history.empty()){
             cout<< "Command not found \n";
             return;
@@ -509,7 +510,7 @@ using namespace std;
         history[cNum]->execute(fs);
     }
     string ExecCommand::toString(){
-        cout << "exec "+getArgs()+"\n";
+        return "exec "+getArgs()+"\n";
     }
 
     ErrorCommand::ErrorCommand(string args):BaseCommand(args){}
@@ -517,7 +518,7 @@ using namespace std;
         cout << getArgs() + ": Unknown Command"+"\n";
     }
     string ErrorCommand::toString(){
-        cout << "error "+getArgs()+"\n";
+        return "error "+getArgs()+"\n";
     }
 
     MvCommand::MvCommand(string args):BaseCommand(args){}
@@ -525,7 +526,7 @@ using namespace std;
         string src;
         Directory *destination;
         BaseFile *fileToCopy;
-        int index = getArgs().find(" ");
+        size_t index = getArgs().find(" ");
         if (index == string::npos) {
             cout << " No such file or directory \n";
             return;
@@ -533,7 +534,7 @@ using namespace std;
 
         src = getArgs().substr(0, index);
         string des = getArgs().substr((index + 1));
-        int index1 = src.find_last_of("/");
+        size_t index1 = src.find_last_of("/");
         if (index1 == string::npos) {
 
             vector<BaseFile *> v = fs.getWorkingDirectory().getChildren();
@@ -605,7 +606,7 @@ using namespace std;
 
 
         //remove
-        if (src == "/" | src == "") {
+        if ((src == "/") || (src == "")) {
             cout << "Can't remove directory \n";
             return;
         }
@@ -633,7 +634,7 @@ using namespace std;
         }
 
         for (BaseFile *c:curr->getChildren()) {
-            if (c->getName() == name)
+            if (c->getName() == name) {
                 if (c->isFile()) {
                     File *f1 = new File(fileToCopy->getName(), fileToCopy->getSize());
                     destination->addFile(f1);
@@ -655,22 +656,22 @@ using namespace std;
                     }
 
                 }
+            }
         }
-
 
     }
     string MvCommand::toString(){
-        cout<< "Mv "+ getArgs()+ "\n";
+        return "Mv "+ getArgs()+ "\n";
     }
 
     RmCommand::RmCommand(string args):BaseCommand(args){}
     void RmCommand::execute(FileSystem & fs){
-        if (getArgs()=="/" | getArgs()== ""){
+        if ((getArgs()=="/") || (getArgs()== "")){
             cout<< "Can't remove directory \n";
         }
         Directory* curr;
         string name;
-        int index = getArgs().find_last_of("/");
+        size_t index = getArgs().find_last_of("/");
         if (index==string::npos){
             curr = getLegalPath(&fs.getWorkingDirectory(), fs, getArgs());
             if (curr== nullptr) {
@@ -696,20 +697,18 @@ using namespace std;
         }
 
         for (BaseFile* c:curr->getChildren()){
-            if (c->getName()==name)
-                if (c->isFile()){
+            if (c->getName()==name) {
+                if (c->isFile()) {
                     curr->removeFile(name);
                     return;
-                }
-                else
-                    if (isWdAncestor(fs,(Directory*)c)){
-                        cout << "Can't remove directory \n";
-                        return;
-                    }else
-                        curr->removeFile(name);
+                } else if (isWdAncestor(fs, (Directory *) c)) {
+                    cout << "Can't remove directory \n";
+                    return;
+                } else
+                    curr->removeFile(name);
 
 
-
+            }
         }
 
 

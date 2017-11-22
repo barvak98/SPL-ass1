@@ -42,15 +42,20 @@ using namespace std;
         return *this;
     }
     Environment& Environment::operator=(Environment &&other){
-        if (verbose==1 || verbose==3)
-            std::cout <<"Environment& Environment::operator=(Environment &&other)";
-        for (BaseCommand* c: commandsHistory){
-            delete c;
-            c= nullptr;
+        if (verbose == 1 || verbose == 3)
+            std::cout << "Environment& Environment::operator=(Environment &&other)";
+        if (this!=&other) {
+            for (BaseCommand *c: commandsHistory) {
+                delete c;
+                c = nullptr;
+            }
+            commandsHistory.clear();
+            commandsHistory = std::move(other.commandsHistory);
+            fs=other.fs;
+
         }
-        commandsHistory.clear();
-        commandsHistory = std::move(other.commandsHistory);
-        fs=other.fs;
+        return *this;
+
     }
     void Environment::start() {
 
@@ -67,7 +72,7 @@ using namespace std;
             string arg;
             if(input=="exit")
                 break;
-            int index = input.find(" ");
+             size_t index = input.find(" ");
             if(index==string::npos){
                 cmd=input;
                 if( cmd == "pwd"){

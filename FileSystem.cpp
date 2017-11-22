@@ -26,18 +26,24 @@ using namespace std;
     FileSystem* FileSystem::operator=(const FileSystem &other){
         if (verbose==1 || verbose==3)
             std::cout << "FileSystem* FileSystem::operator=(const FileSystem &other)";
-        delete rootDirectory;
-        rootDirectory=other.rootDirectory;
-        workingDirectory=other.workingDirectory;
+        if (this!= &other) {
+            delete rootDirectory;
+            rootDirectory = other.rootDirectory;
+            workingDirectory = other.workingDirectory;
+        }
+        return this;
     }
     FileSystem* FileSystem::operator=( FileSystem &&other){
         if (verbose==1 || verbose==3)
             std::cout <<"FileSystem* FileSystem::operator=( FileSystem &&other)";
-        delete rootDirectory;
-        rootDirectory=other.rootDirectory;
-        workingDirectory=other.workingDirectory;
-        other.rootDirectory= nullptr;
-        other.workingDirectory=nullptr;
+        if (this!= &other) {
+            delete rootDirectory;
+            rootDirectory = other.rootDirectory;
+            workingDirectory = other.workingDirectory;
+            other.rootDirectory = nullptr;
+            other.workingDirectory = nullptr;
+        }
+        return this;
     }
     Directory& FileSystem::getRootDirectory() const{
         return *rootDirectory;

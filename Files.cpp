@@ -63,7 +63,7 @@ using namespace std;
         }
     }// Copy Constructor
     Directory::Directory(Directory&& otherDir):BaseFile(otherDir.getName()), children(std::move(otherDir.children)),parent(otherDir.parent)
-    {
+        {
         if (verbose==1 || verbose==3)
             std::cout <<"Directory::Directory(Directory&& otherDir)";
         otherDir.setName("");
@@ -84,14 +84,14 @@ using namespace std;
                     File* f= new File(c->getName(),c->getSize());
                     this->addFile(f);
                 }else{
-                    Directory* d = new Directory(((Directory&)c));
+                    Directory* d = (Directory*) c;
                     this->addFile(d);
                 }
             }
             setParent(other.parent);
             return *this;
         }
-
+        return *this;
     } // Copy Assignment Operator
     Directory& Directory::operator=(Directory &&other) {
         if (verbose==1 || verbose==3)
@@ -110,6 +110,7 @@ using namespace std;
             other.parent= nullptr;
             return *this;
         }
+        return *this;
     }
     Directory::~Directory() {
         if (verbose==1 || verbose==3)
